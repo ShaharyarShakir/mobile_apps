@@ -1,6 +1,7 @@
-import { findById } from "../models/Anime";
-import { findById as _findById } from "../models/User";
-import { verify } from "jsonwebtoken";
+import Anime from "../models/Anime.js";
+import User from "../models/User.js";
+import jwt from "jsonwebtoken";
+const { verify } = jwt;
 
 const handleSocketConnection = (io) => {
   io.use(async (socket, next) => {
@@ -10,7 +11,7 @@ const handleSocketConnection = (io) => {
     }
     try {
       const payload = verify(token, process.env.ACCESS_TOKEN_SECRET);
-      const user = await _findById(payload.id);
+      const user = await User.findById(payload.id);
       if (!user) {
         return next(new Error("Authentication invalid: User not found"));
       }
@@ -32,7 +33,7 @@ const handleSocketConnection = (io) => {
 
     // New event for fetching anime details
     socket.on("GET_ANIME_INFO", async ({ animeId }) => {
-      const anime = await findById(animeId).populate("comments.user");
+      const anime = await Anime.findById(animeId).populate("comments.user");
       if (!anime) {
         socket.emit("ERROR", { message: "Anime not found" });
         return;
@@ -53,7 +54,7 @@ const handleSocketConnection = (io) => {
     });
 
     socket.on("LIKE_ANIME", async ({ animeId }) => {
-      const anime = await findById(animeId);
+      const anime = await Anime.findById(animeId);
 
       if (!anime) {
         socket.emit("ERROR", { message: "Anime not found" });
@@ -71,7 +72,7 @@ const handleSocketConnection = (io) => {
     });
 
     socket.on("RATE_ANIME", async ({ animeId, rating }) => {
-      const anime = await findById(animeId);
+      const anime = await Anime.findById(animeId);
 
       if (!anime) {
         socket.emit("ERROR", { message: "Anime not found" });
@@ -87,7 +88,7 @@ const handleSocketConnection = (io) => {
     });
 
     socket.on("STAR_ANIME", async ({ animeId }) => {
-      const anime = await findById(animeId);
+      const anime = await Anime.findById(animeId);
 
       if (!anime) {
         socket.emit("ERROR", { message: "Anime not found" });
@@ -105,7 +106,7 @@ const handleSocketConnection = (io) => {
     });
 
     socket.on("NEW_COMMENT", async ({ animeId, comment }) => {
-      const anime = await findById(animeId);
+      const anime = await Anime.findById(animeId);
       if (!anime) {
         socket.emit("ERROR", { message: "Anime not found" });
         return;
@@ -114,7 +115,7 @@ const handleSocketConnection = (io) => {
       anime.comments.push({ user: socket.user.id, comment });
       await anime.save();
 
-      const updatedAnime = await findById(animeId).populate(
+      const updatedAnime = await Anime.findById(animeId).populate(
         "comments.user"
       );
 
@@ -122,7 +123,7 @@ const handleSocketConnection = (io) => {
     });
 
     socket.on("SEND_REACTION", async ({ animeId, reaction }) => {
-      const anime = await findById(animeId);
+      const anime = await Anime.findById(animeId);
       if (!anime) {
         socket.emit("ERROR", { message: "Anime not found" });
         return;
