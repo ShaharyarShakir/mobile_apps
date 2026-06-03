@@ -1,6 +1,7 @@
 import { Router } from "express";
 const router = Router();
-import { refreshToken, signInWithGoogle } from "../controllers/auth";
+import authController from "../controllers/auth.js";
+const { refreshToken, signInWithGoogle } = authController;
 
 
 router.post("/login", signInWithGoogle);
