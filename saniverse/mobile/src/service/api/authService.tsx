@@ -25,7 +25,7 @@ export const signInWithGoogle = async () => {
         const res = await GoogleSignin.signIn();
         return res.data?.idToken
     } catch (error: any) {
-        console.log(error.response.status)
+        console.log(error.response?.status)
         console.log('SIGN IN WITH GOOGLE ERROR', error);
         Alert.alert("Please configure Google Sign in correctly")
         return null
