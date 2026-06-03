@@ -1,27 +1,26 @@
 import express from "express";
-import { find } from "../models/Anime";
+import Anime from "../models/Anime.js";
 
 const selectors = "id title description likes rating starred thumbnail_url stream_url genre"
 const getAnime = async (req, res) => {
   try {
-    const liveAnime = await find({ is_live: true })
+    const liveAnime = await Anime.find({ is_live: true })
       .select(selectors)
       .lean();
 
-    const topLikedAnime = await find({})
+    const topLikedAnime = await Anime.find({})
       .sort({ likes: -1 })
       .limit(10)
       .select(selectors)
       .lean();
 
-    const topStarredAnime = await find({})
+    const topStarredAnime = await Anime.find({})
       .sort({ starred: -1 })
       .limit(10)
       .select(selectors)
       .lean();
 
-    const topRatedAnime = await find({})
-      .sort({ rating: -1 })
+    const topRatedAnime = await Anime.find({})
       .limit(10)
       .select(selectors)
       .lean();
