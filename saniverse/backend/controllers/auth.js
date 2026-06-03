@@ -1,7 +1,8 @@
-import User, { findOne, findById } from "../models/User";
+import User from "../models/User.js";
 import { StatusCodes } from "http-status-codes";
-import { BadRequestError, UnauthenticatedError } from "../errors";
-import { verify } from "jsonwebtoken";
+import { BadRequestError, UnauthenticatedError } from "../errors/index.js";
+import jwt from "jsonwebtoken";
+const { verify } = jwt;
 import { OAuth2Client } from "google-auth-library";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -15,7 +16,7 @@ const generateUniqueUsername = async (name) => {
       name.replace(/\s/g, "").toLowerCase().substring(0, 6) +
       Math.random().toString(36).substr(2, 6);
 
-    const existingUser = await findOne({ username });
+    const existingUser = await User.findOne({ username });
     if (!existingUser) {
       isUnique = true;
     }
@@ -43,7 +44,7 @@ const signInWithGoogle = async (req, res) => {
       throw new UnauthenticatedError("Invalid Token or expired");
     }
 
-    let user = await findOne({ email: verifiedEmail });
+    let user = await User.findOne({ email: verifiedEmail });
 
     if (user) {
       const accessToken = user.createAccessToken();
@@ -86,7 +87,7 @@ const refreshToken = async (req, res) => {
 
   try {
     const payload = verify(refresh_token, process.env.REFRESH_TOKEN_SECRET);
-    const user = await findById(payload.id);
+    const user = await User.findById(payload.id);
 
     if (!user) {
       throw new UnauthenticatedError("Invalid refresh token");
