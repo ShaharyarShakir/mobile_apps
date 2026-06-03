@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AuthSync from '@/components/AuthSync';
 import { StatusBar } from 'expo-status-bar';
 import * as Sentry from '@sentry/react-native';
+import SocketConnection from '@/components/SocketConnection';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -45,6 +46,7 @@ export default Sentry.wrap(function Layout() {
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <QueryClientProvider client={queryClient}>
         <AuthSync />
+        <SocketConnection />
         <StatusBar style="light" />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#0D0D0F' } }}>
           <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
