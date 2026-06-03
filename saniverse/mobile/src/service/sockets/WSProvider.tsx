@@ -25,7 +25,7 @@ const WSContext = createContext<WSService | undefined>(undefined);
 
 export const WSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [socketAccessToken, setSocketAccessToken] = useState<string | null>(null);
-  const socket = useRef<Socket>();
+  const socket = useRef<Socket | undefined>(undefined);
 
   useEffect(() => {
     const token = tokenStorage.getString("accessToken") as any;
