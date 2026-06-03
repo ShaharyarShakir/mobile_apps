@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "301842437360",
+    "project_id": "saniverse-b16f3",
+    "storage_bucket": "saniverse-b16f3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:301842437360:android:3d1e7a400a448fd1401e35",
+        "android_client_info": {
+          "package_name": "com.shaharyarshakir.saniverse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCkhFIRiUeC02RKRHFN34XlvhDAC3mo6e0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
