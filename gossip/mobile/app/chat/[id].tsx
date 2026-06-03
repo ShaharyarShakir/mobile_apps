@@ -76,7 +76,7 @@ export default function ChatDetailScreen() {
 
   const handleSend = () => {
     console.log({ isSending, isConnected, currentUser, messageText });
-    if (!messageText.trim() || isSending || !isConnected || !currentUser) return;
+    if (!messageText.trim() || isSending || !isConnected || !currentUser || !chatId) return;
 
     // stop typing indicator
     if (typingTimeOutRef.current) {
