@@ -53,6 +53,54 @@
       "last_modified": "2026-05-27T10:28:13Z",
       "resolved": "github:NixOS/nixpkgs/4100e830e085863741bc69b156ec4ccd53ab5be0?lastModified=1779877693&narHash=sha256-NOF9NAREhxr50bbBfVcVOq%2BArCMSoe8dP79Pk2uyARk%3D"
     },
+    "javaPackages.compiler.openjdk17-bootstrap@latest": {
+      "last_modified": "2026-05-21T08:15:18Z",
+      "resolved": "github:NixOS/nixpkgs/4a29d733e8a7d5b824c3d8c958a946a9867b3eb2#javaPackages.compiler.openjdk17-bootstrap",
+      "source": "devbox-search",
+      "version": "17.0.19",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7q668kmzzk3kxz9dchf5kz86fv5w5vh3-temurin-bin-17.0.19",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7q668kmzzk3kxz9dchf5kz86fv5w5vh3-temurin-bin-17.0.19"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/2n3s3wl2w6rqrbxlp97izyhw5hw0r5d9-temurin-bin-17.0.19",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/2n3s3wl2w6rqrbxlp97izyhw5hw0r5d9-temurin-bin-17.0.19"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/xxp9jxbzqj3kqgssyjlk2xvi9yi5jpvf-temurin-bin-17.0.19",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/xxp9jxbzqj3kqgssyjlk2xvi9yi5jpvf-temurin-bin-17.0.19"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qg6c2mshjw25czq9zyf2qksvqqw3d9jk-temurin-bin-17.0.19",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/qg6c2mshjw25czq9zyf2qksvqqw3d9jk-temurin-bin-17.0.19"
+        }
+      }
+    },
     "nodejs@latest": {
       "last_modified": "2026-05-21T08:15:18Z",
       "plugin_version": "0.0.2",

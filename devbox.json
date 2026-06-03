@@ -3,7 +3,8 @@
   "packages": [
     "nodejs@latest",
     "bun@latest",
-    "uv@latest"
+    "uv@latest",
+    "javaPackages.compiler.openjdk17-bootstrap@latest"
   ],
   "shell": {
     "init_hook": [
