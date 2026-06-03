@@ -1,0 +1,6 @@
+MONGO_URI=mongodb://user:pass@localhost:27017/saniverse:xa:?authSource=admin&directConnection=true
+ACCESS_TOKEN_SECRET=tomandjerry
+ACCESS_TOKEN_EXPIRY=1d
+REFRESH_TOKEN_SECRET=jerryandtom
+REFRESH_TOKEN_EXPIRY=30d
+GOOGLE_CLIENT_ID=XXXXX-XXXXXXXXX.apps.googleusercontent.com
