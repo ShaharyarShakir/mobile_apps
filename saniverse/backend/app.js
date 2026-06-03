@@ -3,7 +3,7 @@ import "express-async-errors";
 
 import express, { json } from "express";
 import { createServer } from "http";
-import socketIo from "socket.io";
+import { Server } from "socket.io";
 import connectDB from "./config/connect.js";
 import notFoundMiddleware from "./middleware/not-found.js";
 import errorHandlerMiddleware from "./middleware/error-handler.js";
@@ -21,7 +21,7 @@ app.use(json());
 
 const server = createServer(app);
 
-const io = socketIo(server, { cors: { origin: "*" } });
+const io = new Server(server, { cors: { origin: "*" } });
 
 // Attach the WebSocket instance to the request object
 app.use((req, res, next) => {
