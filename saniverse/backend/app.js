@@ -1,20 +1,20 @@
-require("dotenv").config();
+import "dotenv/config";
 import "express-async-errors";
 
 import express, { json } from "express";
 import { createServer } from "http";
 import socketIo from "socket.io";
-import connectDB from "./config/connect";
-import notFoundMiddleware from "./middleware/not-found";
-import errorHandlerMiddleware from "./middleware/error-handler";
-import authMiddleware from "./middleware/authentication";
+import connectDB from "./config/connect.js";
+import notFoundMiddleware from "./middleware/not-found.js";
+import errorHandlerMiddleware from "./middleware/error-handler.js";
+import authMiddleware from "./middleware/authentication.js";
 
 // Routers
-import authRouter from "./routes/auth";
-import animeRouter from "./routes/anime";
+import authRouter from "./routes/auth.js";
+import animeRouter from "./routes/anime.js";
 
 // Import socket handler
-import handleSocketConnection from "./controllers/sockets";
+import handleSocketConnection from "./controllers/sockets.js";
 
 const app = express();
 app.use(json());
@@ -25,8 +25,8 @@ const io = socketIo(server, { cors: { origin: "*" } });
 
 // Attach the WebSocket instance to the request object
 app.use((req, res, next) => {
-    req.io = io;
-    return next();
+  req.io = io;
+  return next();
 });
 
 // Initialize the WebSocket handling logic
@@ -41,17 +41,17 @@ app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
 
 const start = async () => {
-    try {
-        await connectDB(process.env.MONGO_URI);
-        server.listen(process.env.PORT || 3000, () =>
-            console.log(
-                `HTTP server is running on port http://localhost:${process.env.PORT || 3000
-                }`
-            )
-        );
-    } catch (error) {
-        console.log(error);
-    }
+  try {
+    await connectDB(process.env.MONGO_URI);
+    server.listen(process.env.PORT || 3000, () =>
+      console.log(
+        `HTTP server is running on port http://localhost:${process.env.PORT || 3000
+        }`
+      )
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 start();
