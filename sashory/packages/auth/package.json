@@ -1,0 +1,25 @@
+{
+  "name": "@sashory/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@better-auth/expo": "catalog:",
+    "@sashory/db": "workspace:*",
+    "@sashory/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@sashory/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
