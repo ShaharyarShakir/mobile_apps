@@ -1,0 +1,3 @@
+{
+  "extends": "@sashory/config/tsconfig.base.json"
+}
