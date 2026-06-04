@@ -1,4 +1,15 @@
 {
+ 
+  "compilerOptions": {
+    "baseUrl": ".",
+     "paths": {
+      "@/*": ["*"]
+    },
+  
+  },
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
