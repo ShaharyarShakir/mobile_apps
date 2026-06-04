@@ -12,6 +12,8 @@ Welcome to the **Mobile Apps Portfolio**! This repository is a monorepo containi
 | [**🧠 Emotion Detection**](#-2-emotion-detection-app) | Text emotion classifier, confidence scoring | FastAPI, scikit-learn, joblib, Python (`uv`), Expo, TailwindCSS | iOS, Android | Complete |
 | [**🔍 QR Code Scanner**](#-3-qr-code-scanner--generator) | Camera scanner with Skia overlays, QR generation, history | Expo Camera, `@shopify/react-native-skia`, `react-native-qrcode-svg` | iOS, Android | Complete |
 | [**🐙 Pokedex**](#-4-pokedex-pokemon-encyclopedia) | Pokemon listing, search, stats, rich UI animations | Expo Router, React Native Reanimated, Expo Image | iOS, Android | Complete |
+| [**📺 Saniverse**](#-5-saniverse-anime-streaming-platform) | HLS live streaming, real-time reactions & comments, Google Auth | Bun, Express, MongoDB, Socket.io, Expo Video, React Native Reanimated, Zustand | iOS, Android | Complete |
+| [**💰 Sashory**](#-6-sashory-full-stack-finance-app) | Full-stack monorepo, PostgreSQL & Drizzle, modular auth | Bun, Hono, Drizzle ORM, PostgreSQL, Better-Auth, React Native, Expo, TailwindCSS, Turborepo | iOS, Android | In Progress |
 
 ---
 
@@ -129,6 +131,74 @@ A visually interactive encyclopedia for Pokemon, pulling details, stats, and cus
 cd pokedex
 npm install
 npx expo start
+```
+
+---
+
+### 📺 5. Saniverse (Anime Streaming Platform)
+
+A premium anime streaming platform featuring HTTP Live Streaming (HLS) support, real-time interactivity via WebSockets, and rich client-side animations.
+
+* **Features**:
+  * Live streaming and HLS playback with custom video controls.
+  * Real-time social interaction (likes, ratings, comments, and reaction emojis) synchronized via Socket.io.
+  * Google Sign-In and secure token-based user authentication.
+  * Sleek UI with modern glassmorphism aesthetic and smooth transitions.
+* **Architecture**:
+  * `saniverse/backend/` — Express API server running on Bun, managing WebSockets, JWT auth, and MongoDB.
+  * `saniverse/mobile/` — Expo React Native mobile application leveraging Zustand, Reanimated, and native UI components.
+
+#### Run & Setup
+Ensure you have [Bun](https://bun.sh/) installed.
+
+**Backend Setup:**
+```bash
+cd saniverse/backend
+bun install
+# Copy environment variables (env_template -> .env) and configure MongoDB & JWT secret keys
+bun run start
+```
+
+**Mobile Setup:**
+```bash
+cd saniverse/mobile
+bun install
+bun start
+```
+
+---
+
+### 💰 6. Sashory (Full-Stack Finance App)
+
+A premium full-stack personal finance and wealth management application built in a monorepo structure.
+
+* **Features**:
+  * Full-stack monorepo managed with Turborepo.
+  * Type-safe database operations with PostgreSQL and Drizzle ORM.
+  * Secure, modular authentication using Better-Auth.
+  * High-performance, lightweight API endpoints using Hono.
+  * Responsive, modern mobile frontend with TailwindCSS utility styling.
+* **Architecture**:
+  * `sashory/apps/native/` — Mobile application built with React Native and Expo.
+  * `sashory/apps/server/` — Backend API built with Hono.
+  * `sashory/packages/auth/` — Shared authentication configuration and logic.
+  * `sashory/packages/db/` — Shared database schema, migrations, and queries.
+
+#### Run & Setup
+Ensure you have [Bun](https://bun.sh/) installed.
+
+**Database & Server Setup:**
+```bash
+cd sashory
+bun install
+# Configure apps/server/.env with BETTER_AUTH_SECRET, BETTER_AUTH_URL, CORS_ORIGIN, and DATABASE_URL
+bun run db:push
+bun run dev
+```
+
+**Run Mobile Client Only:**
+```bash
+bun run dev:native
 ```
 
 ---
