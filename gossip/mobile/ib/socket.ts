@@ -4,7 +4,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { Chat, Message, MessageSender } from "@/types";
 import * as Sentry from "@sentry/react-native";
 
-const SOCKET_URL = "https://pfcr6d99-3000.inc1.devtunnels.ms";
+const SOCKET_URL = "http://localhost:3000";
 
 interface SocketState {
   socket: Socket | null;
