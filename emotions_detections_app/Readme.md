@@ -70,3 +70,26 @@ You can run the app on an Android emulator, iOS simulator, or on your physical d
 
 ## Notes
 - If you wish to use the local backend, update the fetch URL in `mobile/app/index.tsx` to `http://<YOUR_LOCAL_IP>:8000/predict` (or use a tunneling service like ngrok).
+
+## 📦 CI/CD & Release Builds
+
+This project contains a GitHub Actions workflow configuration ([release.yaml](file:///home/shaharyar/01__git_repos/mobile_apps/emotions_detections_app/.github/workflows/release.yaml)) to automate Android APK generation and release creation.
+
+### Workflow Configuration
+When pushed to its own repository, the workflow triggers on version tags:
+- **Trigger**: `v*` tags (e.g., `v1.0.0`)
+- **Required Repository Secrets**:
+  - `EXPO_TOKEN`: Your Expo access token for EAS authentication.
+  - `GITHUB_TOKEN`: The built-in token (requires `contents: write` permissions enabled in repo settings to upload assets and create releases).
+
+### Build Details
+The workflow performs the following steps:
+1. **Environment Setup**: Checks out code and installs Bun.
+2. **Dependency Resolution**: Installs packages inside the `mobile/` directory using Bun.
+3. **EAS Authentication**: Integrates EAS CLI using `expo/expo-github-action`.
+4. **Android Compilation**: Compiles the APK locally with:
+   ```bash
+   eas build --platform android --profile preview --non-interactive --local
+   ```
+5. **Asset Packaging**: Renames the compiled APK to `emotions-${VERSION}.apk`.
+6. **Publishing**: Creates a GitHub Release and uploads the generated APK binary.

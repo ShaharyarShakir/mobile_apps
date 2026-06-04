@@ -89,6 +89,20 @@ npm install
 npm start
 ```
 
+#### 📦 CI/CD & Release Builds
+The project includes a GitHub Actions workflow configuration (located at [release.yaml](file:///home/shaharyar/01__git_repos/mobile_apps/emotions_detections_app/.github/workflows/release.yaml)) that automates Android APK generation and release creation:
+- **Trigger**: Runs automatically when a version tag matching `v*` (e.g., `v1.0.0`) is pushed.
+- **Process**:
+  1. Sets up the environment with Bun.
+  2. Restores and installs mobile dependencies.
+  3. Configures EAS CLI with an Expo token (`EXPO_TOKEN` repository secret).
+  4. Builds the Android APK locally using:
+     ```bash
+     eas build --platform android --profile preview --non-interactive --local
+     ```
+  5. Renames the output APK to `emotions-${VERSION}.apk`.
+  6. Creates a new GitHub Release with auto-generated release notes and uploads the APK.
+
 ---
 
 ### 🔍 3. QR Code Scanner & Generator
