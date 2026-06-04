@@ -1,5 +1,5 @@
 import path from "node:path";
-
+import cors from "cors"
 import { clerkMiddleware } from "@clerk/express";
 import express from "express";
 
@@ -10,11 +10,24 @@ import messageRoute from "./routes/messageRoute";
 import userRoute from "./routes/userRoute";
 
 const app = express();
+const allowOrigins = [
+	"http://localhost:8080", //expo mobile
+	"http://localhost:5173", // vite web
+	process.env.FRONTEND_URL!, // production	
+].filter(Boolean)
+
+app.use(cors({
+	origin: allowOrigins,
+	credentials: true
+}))
 
 // parse the incoming JSON request body and avail them in req.body
 app.use(express.json());
 
 app.use(clerkMiddleware());
+
+
+
 
 app.get("/health", (req, res) => {
 	res.json({ status: "ok", message: "Server is running" });
