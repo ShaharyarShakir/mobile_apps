@@ -1,19 +1,19 @@
-import { Icon } from "expo-router";
-import { NativeTabs } from "expo-router/build/native-tabs";
+import { Stack } from "expo-router"
+import { KeyboardProvider } from "react-native-keyboard-controller"
 
-export default function RootLayout() {
-  return <NativeTabs>
-    <NativeTabs.Trigger name="home">
-      <Icon
-        sf={{ default: 'house', selected: 'house.fill' }}
-        md={{ default: 'home', selected: 'home_filled' }}
-      />
-    </NativeTabs.Trigger>
-    <NativeTabs.Trigger name="settings">
-      <Icon
-        sf={{ default: 'gearshape', selected: 'gearshape.fill' }}
-        md={{ default: 'settings', selected: 'settings' }}
-      />
-    </NativeTabs.Trigger>
-  </NativeTabs>
+const Layout = () => {
+    return <Stack>
+        <Stack.Screen name="index" options={{
+            headerShown: false
+        }} />
+        <Stack.Screen name="(tabs)" options={{
+            headerShown: false
+        }} />
+    </Stack>
 }
+const RootLayout = () => {
+    return <KeyboardProvider>
+        <Layout />
+    </KeyboardProvider>
+}
+export default Layout
