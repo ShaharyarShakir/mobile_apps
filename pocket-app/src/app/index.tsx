@@ -1,11 +1,30 @@
 import { COLORS } from "@/utils/Colors";
+import { useSSO } from "@clerk/expo";
+import { OAuthStrategy } from '@clerk/types';
 import { AntDesign } from "@expo/vector-icons";
 import { Link } from "expo-router";
+import * as WebBrowser from 'expo-web-browser';
 import { Button, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 export default function Page() {
     // return <Redirect href={'/(tabs)/saves'} />
-    const handleSocialLogin = (provider: string) => { }
+    const openLink = () => {
+        WebBrowser.openBrowserAsync('https://shakir-retro-portfolio.netlify.app/')
+    }
+    const { startSSOFlow } = useSSO()
+    const handleSocialLogin = async (provider: string) => {
+        const { createdSessionId, setActive, } = await startSSOFlow({
+            strategy: provider as OAuthStrategy
+        })
+        if (createdSessionId) {
+            setActive!({
+                session: createdSessionId,
+                navigate: async ({ session }) => {
+                    // router.replace('/(tabs)/home')
+                }
+            })
+        }
+    }
     return (
         <KeyboardAvoidingView
             style={styles.container}
@@ -54,20 +73,20 @@ export default function Page() {
                 <Text style={styles.termsText}>
                     By proceeding, you agree to:{'\n'}
                     Pocket's{' '}
-                    <Text style={styles.link} onPress={() => { }}>
+                    <Text style={styles.link} onPress={() => openLink}>
                         Terms of Service
                     </Text>{' '}
                     and{' '}
-                    <Text style={styles.link} onPress={() => { }}>
+                    <Text style={styles.link} onPress={() => openLink}>
                         Privacy Notice
                     </Text>
                     .{'\n'}
                     Mozilla Accounts{' '}
-                    <Text style={styles.link} onPress={() => { }}>
+                    <Text style={styles.link} onPress={() => openLink}>
                         Terms of Service
                     </Text>{' '}
                     and{' '}
-                    <Text style={styles.link} onPress={() => { }}>
+                    <Text style={styles.link} onPress={() => openLink}>
                         Privacy Notice
                     </Text>
                     .
