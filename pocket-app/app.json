@@ -22,7 +22,7 @@
       "package": "com.shaharyarshakir.pocketapp"
     },
     "web": {
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -36,7 +36,10 @@
             "imageWidth": 76
           }
         }
-      ]
+      ],
+      "@clerk/expo",
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
