@@ -1,4 +1,5 @@
 // import ArticlesFeed from '@/components/articles-feed';
+import ArticlesFeed from '@/components/articles-feed';
 import { COLORS } from '@/utils/Colors';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -13,7 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export default function HomeScreen() {
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const translateY1 = useSharedValue(0);
     const translateY2 = useSharedValue(0);
@@ -75,12 +76,12 @@ export default function HomeScreen() {
         );
     }
 
-    // return (
-    //     <>
-    //         <ArticlesFeed maxItems={15} feedSource="react-native" title="React Native Blog" />
-    //         {/* <ArticlesFeed maxItems={15} feedSource="expo" title="Expo Blog" /> */}
-    //     </>
-    // );
+    return (
+        <>
+            <ArticlesFeed maxItems={15} feedSource="react-native" title="React Native Blog" />
+            {/* <ArticlesFeed maxItems={15} feedSource="expo" title="Expo Blog" /> */}
+        </>
+    );
 }
 
 const styles = StyleSheet.create({
