@@ -28,6 +28,7 @@
     "expo-system-ui": "~56.0.5",
     "expo-web-browser": "~56.0.5",
     "fast-xml-parser": "^5.8.0",
+    "linkedom": "^0.18.12",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.85.3",
