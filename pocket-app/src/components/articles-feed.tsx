@@ -1,6 +1,7 @@
 import { rssArticles, savedItems, type RssArticle } from '@/db/schema';
 import { COLORS } from '@/utils/Colors';
 import { useUser } from '@clerk/expo';
+
 import { desc, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import * as Crypto from 'expo-crypto';
@@ -218,7 +219,7 @@ export default function ArticlesFeed({
 
             // Update local state
             setArticles((prev) => prev.map((a) => (a.id === article.id ? { ...a } : a)));
-            router.push(`/(modal)/success`);
+            router.push(`/(modal)success`);
         } catch (error) {
             console.error('Failed to save article:', error);
         }
