@@ -183,7 +183,7 @@ export default function ArticlesFeed({
 
     const handleSaveArticle = async (article: RssArticle) => {
         try {
-            console.log('🚀 ~ handleSaveArticle ~ user:', user);
+            // console.log('🚀 ~ handleSaveArticle ~ user:', user);
 
             // Add to saved items
             const itemId = Crypto.randomUUID();
@@ -194,7 +194,7 @@ export default function ArticlesFeed({
                 .where(eq(savedItems.url, article.url));
 
             if (existing.length > 0) {
-                console.log('🚀 ~ handleSaveArticle ~ existing:', existing);
+                // console.log('🚀 ~ handleSaveArticle ~ existing:', existing);
                 // Already saved, do nothing or show a message
                 return;
             }
