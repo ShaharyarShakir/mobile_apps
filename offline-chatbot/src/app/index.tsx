@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { completion, loadModel, unloadModel } from "@qvac/sdk";
 import { useClipboard } from "@react-native-clipboard/clipboard";
-// Replace YOUR_MODEL_CONSTANT with your actual model, e.g. QWEN3_600M_INST_Q4
 import { QWEN3_600M_INST_Q4 } from "@qvac/sdk";
 import { SymbolView } from "expo-symbols";
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { parseMessageContent } from "@/lib/utils";
 
 const SUGGESTIONS = [
   {
@@ -128,6 +128,7 @@ export default function Index() {
       { id: assistantId, role: "assistant", content: "" },
     ]);
 
+    let hasStartedThinking = false;
     try {
       const result = completion({
         modelId,
@@ -139,13 +140,35 @@ export default function Index() {
       });
 
       for await (const event of result.events) {
-        if (event.type === "contentDelta") {
+        if (event.type === "thinkingDelta") {
           setMessages((prev) =>
-            prev.map((m) =>
-              m.id === assistantId
-                ? { ...m, content: m.content + event.text }
-                : m
-            )
+            prev.map((m) => {
+              if (m.id === assistantId) {
+                let newContent = m.content;
+                if (!hasStartedThinking && !newContent.includes("<think>")) {
+                  newContent += "<think>";
+                  hasStartedThinking = true;
+                }
+                newContent += event.text;
+                return { ...m, content: newContent };
+              }
+              return m;
+            })
+          );
+        } else if (event.type === "contentDelta") {
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m.id === assistantId) {
+                let newContent = m.content;
+                if (hasStartedThinking && !newContent.includes("</think>")) {
+                  newContent += "</think>";
+                  hasStartedThinking = false;
+                }
+                newContent += event.text;
+                return { ...m, content: newContent };
+              }
+              return m;
+            })
           );
         }
       }
@@ -163,6 +186,15 @@ export default function Index() {
       );
     } finally {
       setIsGenerating(false);
+      // Ensure any unclosed think tag is closed
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id === assistantId && m.content.includes("<think>") && !m.content.includes("</think>")) {
+            return { ...m, content: m.content + "</think>" };
+          }
+          return m;
+        })
+      );
     }
   };
 
@@ -171,6 +203,14 @@ export default function Index() {
     setInput("");
     setIsGenerating(false);
   };
+
+  const lastMessage = messages[messages.length - 1];
+  const showThinkingLoader = isGenerating && (
+    !lastMessage ||
+    lastMessage.role === "user" ||
+    parseMessageContent(lastMessage.content).isThinking ||
+    parseMessageContent(lastMessage.content).cleanText === ""
+  );
 
   if (!isModelLoaded) {
     return (
@@ -275,7 +315,7 @@ export default function Index() {
                 />
               ))}
 
-              {isGenerating && messages[messages.length - 1]?.content === "" && (
+              {showThinkingLoader && (
                 <View className="flex-row self-start gap-4 bg-black/20 px-3 py-6 w-full">
                   <View className="justify-center items-center bg-primary shadow-sm border border-border/20 rounded-full w-8 h-8">
                     <SymbolView
