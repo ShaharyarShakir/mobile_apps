@@ -14,6 +14,10 @@ Welcome to the **Mobile Apps Portfolio**! This repository is a monorepo containi
 | [**🐙 Pokedex**](#-4-pokedex-pokemon-encyclopedia) | Pokemon listing, search, stats, rich UI animations | Expo Router, React Native Reanimated, Expo Image | iOS, Android | Complete |
 | [**📺 Saniverse**](#-5-saniverse-anime-streaming-platform) | HLS live streaming, real-time reactions & comments, Google Auth | Bun, Express, MongoDB, Socket.io, Expo Video, React Native Reanimated, Zustand | iOS, Android | Complete |
 | [**💰 Sashory**](#-6-sashory-full-stack-finance-app) | Full-stack monorepo, PostgreSQL & Drizzle, modular auth | Bun, Hono, Drizzle ORM, PostgreSQL, Better-Auth, React Native, Expo, TailwindCSS, Turborepo | iOS, Android | In Progress |
+| [**🤖 Offline Chatbot**](#-7-offline-chatbot-tether-bot) | On-device private LLM chat, real-time streaming, reasoning tags | React Native, `@qvac/sdk`, `react-native-bare-kit`, `@qvac/llm-llamacpp`, NativeWind | iOS, Android | Complete |
+| [**📥 Pocket App**](#-8-pocket-app-read-later--rss-reader) | Article parsing & bookmarks, RSS feed reader, local SQLite db | Expo, React Native, `expo-sqlite`, Drizzle ORM, Clerk, Reanimated | iOS, Android | Complete |
+| [**✅ Todo App**](#-9-todo-app) | Real-time todo syncing, serverless backend integration | Expo, React Native, Convex, NativeWind | iOS, Android | Complete |
+
 
 ---
 
@@ -217,8 +221,96 @@ bun run dev:native
 
 ---
 
+### 🤖 7. Offline Chatbot (Tether Bot)
+
+An offline-first, private, and high-performance AI Chatbot for mobile devices. The application runs LLMs entirely on-device, offering secure and 100% private conversations without requiring internet access or external API calls after the initial setup.
+
+* **Features**:
+  * **100% Offline Inference**: Chat completions run directly on your device CPU/GPU. No data leaves your phone.
+  * **One-Time Model Initialization**: Downloads and compiles the quantized AI model parameters (e.g., Qwen 3 600M Instruction Q4) locally.
+  * **Real-time Streaming**: Token-by-token response generation with interactive visual updates.
+  * **Reasoning Mode Support**: Automatically handles `<think>` tags for reasoning-based models, displaying a thinking status indicator while the model performs intermediate processing.
+* **Tech Stack**:
+  * **Frontend**: React Native, Expo, NativeWind (Tailwind CSS).
+  * **Engine & SDKs**: `@qvac/sdk`, `react-native-bare-kit` (Worker Thread), and `@qvac/llm-llamacpp`.
+
+#### Run & Setup
+Ensure you have Node.js and a package manager installed.
+
+```bash
+cd offline-chatbot
+npm install
+```
+
+> [!NOTE]
+> Since this project uses native C++ runtimes (`react-native-bare-kit` and QVAC native modules), it **cannot** be run in a standard Expo Go client. You must run it as a **Development Build** inside an Android Emulator, iOS Simulator, or physical device.
+
+```bash
+npx expo run:android
+# or
+npx expo run:ios
+```
+
+---
+
+### 📥 8. Pocket App (Read-Later & RSS Reader)
+
+A premium read-later and bookmarking utility featuring article extraction, reading time estimation, and a built-in RSS news feed reader.
+
+* **Features**:
+  * **Saved Bookmarks**: Parse, extract, and store articles locally for offline reading.
+  * **RSS Feed Reader**: Pull articles dynamically from configured RSS feeds (e.g., React Native/Expo blogs) with custom bounce loading animations.
+  * **Offline Persistence**: Local SQLite database with migration management.
+  * **Secure Authentication**: Clerk Auth integration for Apple, Google, and email logins.
+* **Tech Stack**:
+  * **Database**: `expo-sqlite` and `drizzle-orm` (with `drizzle-kit` for schema migrations).
+  * **Auth**: Clerk Authentication (`@clerk/expo`).
+  * **Parsing**: `linkedom` and `fast-xml-parser` for handling HTML and RSS feeds.
+  * **Animations**: React Native Reanimated.
+
+#### Run & Setup
+Ensure you have [Bun](https://bun.sh/) installed.
+
+```bash
+cd pocket-app
+bun install
+# Generate schema migrations
+bun run db:generate
+# Start client
+bun start
+```
+
+---
+
+### ✅ 9. Todo App
+
+A real-time Todo application built with Convex as a serverless backend. It demonstrates file-based routing, real-time subscription queries, and serverless mutations.
+
+* **Features**:
+  * **Real-time Synchronization**: Instant updates across clients via Convex subscription queries.
+  * **Serverless Backend**: Hosted queries, mutations, and database schema definition.
+  * **Modern Styling**: Styled with NativeWind (Tailwind CSS).
+* **Tech Stack**:
+  * **Frontend**: Expo (React Native), Expo Router, TailwindCSS.
+  * **Backend**: Convex.
+
+#### Run & Setup
+Ensure you have the Convex CLI installed globally or run it via npx:
+
+```bash
+cd todo-app
+npm install
+# Start Convex dev environment (binds to Convex cloud project)
+npx convex dev
+# Run the Expo app
+npx expo start
+```
+
+---
+
 ## 🧰 Prerequisites & General Tips
 
-1. **Node.js Environment**: Make sure Node.js (v18+) is installed. Running `bun` is recommended for Gossip's workspaces.
+1. **Node.js Environment**: Make sure Node.js (v18+) is installed. Running `bun` is recommended for Gossip's, Sashory's, and Pocket App's workspaces.
 2. **Python Environment**: Install [uv](https://docs.astral.sh/uv/) for running the ML backend inside `emotions_detections_app`.
-3. **Expo Go / Simulator**: To run the frontend applications on mobile, download the **Expo Go** app on your physical device, or run them on Xcode iOS Simulator / Android Studio Emulator.
+3. **Convex Cloud Backend**: The Todo App requires a Convex account and setup (`npx convex dev`) to connect to your database instance.
+4. **Expo Go / Simulator / Development Build**: To run the frontend applications on mobile, download the **Expo Go** app on your physical device, run them on Xcode iOS Simulator / Android Studio Emulator, or build development clients where native binaries are required (e.g., Offline Chatbot).
