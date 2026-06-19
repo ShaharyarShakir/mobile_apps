@@ -3,6 +3,7 @@ import { Markdown } from "@/components/ui/markdown";
 import { Text } from "@/components/ui/text";
 import { SymbolView } from "expo-symbols";
 import { View } from "react-native";
+import { parseMessageContent } from "@/lib/utils";
 
 export interface Message {
   id: string;
@@ -17,12 +18,17 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message, onCopy }: ChatMessageProps) {
   const isUser = message.role === "user";
+  const { cleanText } = parseMessageContent(message.content);
+
+  if (!isUser && cleanText === "") {
+    return null;
+  }
 
   if (isUser) {
     return (
       <View className="self-end max-w-[85%] bg-secondary border border-border/40 px-4 py-2.5 rounded-2xl rounded-tr-sm my-2 shadow-sm">
         <Text className="text-sm text-foreground selection:bg-primary/30 leading-relaxed">
-          {message.content}
+          {cleanText}
         </Text>
       </View>
     );
@@ -54,7 +60,7 @@ export function ChatMessage({ message, onCopy }: ChatMessageProps) {
               variant="ghost"
               size="icon"
               className="h-7 w-7 rounded-md active:bg-secondary"
-              onPress={() => onCopy(message.content)}
+              onPress={() => onCopy(cleanText)}
             >
               <SymbolView
                 name={{
@@ -69,7 +75,7 @@ export function ChatMessage({ message, onCopy }: ChatMessageProps) {
           )}
         </View>
 
-        <Markdown>{message.content}</Markdown>
+        <Markdown>{cleanText}</Markdown>
       </View>
     </View>
   );
