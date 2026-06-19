@@ -64,7 +64,11 @@ export default function Index() {
     try {
       const id = await loadModel({
         modelSrc: QWEN3_600M_INST_Q4, // swap this constant for your model
-        modelConfig: { ctx_size: 4096 },
+        modelConfig: {
+          ctx_size: 4096,
+          gpu_layers: 0,
+          device: "cpu",
+        },
         onProgress: (p) => setDownloadProgress(p.percentage / 100),
       });
       setModelId(id);
