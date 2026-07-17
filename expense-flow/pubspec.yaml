@@ -1,4 +1,14 @@
 name: expenseflow_workspace
 
 environment:
-  sdk: ">=3.8.0 <4.0.0"
+  sdk: ">=3.12.2 <4.0.0"
+
+workspace:
+  - apps/mobile
+  - backend/api
+  - packages/api_client
+  - packages/shared_models
+  - packages/shared_utils
+
+dev_dependencies:
+  melos: ^8.2.2
