@@ -1,0 +1,6 @@
+name: expenseflow
+
+packages:
+  - apps/**
+  - backend/**
+  - packages/**
