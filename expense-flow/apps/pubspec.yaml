@@ -32,6 +32,7 @@ environment:
 dependencies:
   api_client:
     path: ../packages/api_client
+  connectivity_plus: ^6.0.3
   cupertino_icons: ^1.0.8
   dio: ^5.5.0
   drift: ^2.20.0
@@ -40,6 +41,7 @@ dependencies:
   flutter_riverpod: ^3.0.3
   flutter_secure_storage: ^9.0.0
   go_router: ^14.2.0
+  internet_connection_checker_plus: ^2.5.1
   path: ^1.9.0
   path_provider: ^2.1.3
   shared_models:
@@ -47,6 +49,13 @@ dependencies:
   shared_utils:
     path: ../packages/shared_utils
   sqlite3_flutter_libs: ^0.5.24
+  uuid: ^4.3.3
+  flutter_slidable: ^3.1.1
+  cached_network_image: ^3.4.1
+  image_picker: ^1.1.2
+  image_cropper: ^8.0.2
+  mime: ^1.0.6
+  fl_chart: ^0.68.0
 
 
 dev_dependencies:
