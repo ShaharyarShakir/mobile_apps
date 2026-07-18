@@ -417,8 +417,27 @@ class $LocalCategoriesTable extends LocalCategories
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, userId, name, icon, color];
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('synced'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    userId,
+    name,
+    icon,
+    color,
+    syncStatus,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -468,6 +487,12 @@ class $LocalCategoriesTable extends LocalCategories
     } else if (isInserting) {
       context.missing(_colorMeta);
     }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
     return context;
   }
 
@@ -497,6 +522,10 @@ class $LocalCategoriesTable extends LocalCategories
         DriftSqlType.int,
         data['${effectivePrefix}color'],
       )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
     );
   }
 
@@ -512,12 +541,14 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
   final String name;
   final String icon;
   final int color;
+  final String syncStatus;
   const LocalCategory({
     required this.id,
     required this.userId,
     required this.name,
     required this.icon,
     required this.color,
+    required this.syncStatus,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -527,6 +558,7 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
     map['name'] = Variable<String>(name);
     map['icon'] = Variable<String>(icon);
     map['color'] = Variable<int>(color);
+    map['sync_status'] = Variable<String>(syncStatus);
     return map;
   }
 
@@ -537,6 +569,7 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
       name: Value(name),
       icon: Value(icon),
       color: Value(color),
+      syncStatus: Value(syncStatus),
     );
   }
 
@@ -551,6 +584,7 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
       name: serializer.fromJson<String>(json['name']),
       icon: serializer.fromJson<String>(json['icon']),
       color: serializer.fromJson<int>(json['color']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
     );
   }
   @override
@@ -562,6 +596,7 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
       'name': serializer.toJson<String>(name),
       'icon': serializer.toJson<String>(icon),
       'color': serializer.toJson<int>(color),
+      'syncStatus': serializer.toJson<String>(syncStatus),
     };
   }
 
@@ -571,12 +606,14 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
     String? name,
     String? icon,
     int? color,
+    String? syncStatus,
   }) => LocalCategory(
     id: id ?? this.id,
     userId: userId ?? this.userId,
     name: name ?? this.name,
     icon: icon ?? this.icon,
     color: color ?? this.color,
+    syncStatus: syncStatus ?? this.syncStatus,
   );
   LocalCategory copyWithCompanion(LocalCategoriesCompanion data) {
     return LocalCategory(
@@ -585,6 +622,9 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
       name: data.name.present ? data.name.value : this.name,
       icon: data.icon.present ? data.icon.value : this.icon,
       color: data.color.present ? data.color.value : this.color,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
     );
   }
 
@@ -595,13 +635,14 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
           ..write('userId: $userId, ')
           ..write('name: $name, ')
           ..write('icon: $icon, ')
-          ..write('color: $color')
+          ..write('color: $color, ')
+          ..write('syncStatus: $syncStatus')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, userId, name, icon, color);
+  int get hashCode => Object.hash(id, userId, name, icon, color, syncStatus);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -610,7 +651,8 @@ class LocalCategory extends DataClass implements Insertable<LocalCategory> {
           other.userId == this.userId &&
           other.name == this.name &&
           other.icon == this.icon &&
-          other.color == this.color);
+          other.color == this.color &&
+          other.syncStatus == this.syncStatus);
 }
 
 class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
@@ -619,6 +661,7 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
   final Value<String> name;
   final Value<String> icon;
   final Value<int> color;
+  final Value<String> syncStatus;
   final Value<int> rowid;
   const LocalCategoriesCompanion({
     this.id = const Value.absent(),
@@ -626,6 +669,7 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
     this.name = const Value.absent(),
     this.icon = const Value.absent(),
     this.color = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocalCategoriesCompanion.insert({
@@ -634,6 +678,7 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
     required String name,
     required String icon,
     required int color,
+    this.syncStatus = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        userId = Value(userId),
@@ -646,6 +691,7 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
     Expression<String>? name,
     Expression<String>? icon,
     Expression<int>? color,
+    Expression<String>? syncStatus,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -654,6 +700,7 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
       if (name != null) 'name': name,
       if (icon != null) 'icon': icon,
       if (color != null) 'color': color,
+      if (syncStatus != null) 'sync_status': syncStatus,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -664,6 +711,7 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
     Value<String>? name,
     Value<String>? icon,
     Value<int>? color,
+    Value<String>? syncStatus,
     Value<int>? rowid,
   }) {
     return LocalCategoriesCompanion(
@@ -672,6 +720,7 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
       name: name ?? this.name,
       icon: icon ?? this.icon,
       color: color ?? this.color,
+      syncStatus: syncStatus ?? this.syncStatus,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -694,6 +743,9 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
     if (color.present) {
       map['color'] = Variable<int>(color.value);
     }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -708,6 +760,7 @@ class LocalCategoriesCompanion extends UpdateCompanion<LocalCategory> {
           ..write('name: $name, ')
           ..write('icon: $icon, ')
           ..write('color: $color, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -758,6 +811,18 @@ class $LocalExpensesTable extends LocalExpenses
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('USD'),
+  );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -778,6 +843,29 @@ class $LocalExpensesTable extends LocalExpenses
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _receiptUrlMeta = const VerificationMeta(
+    'receiptUrl',
+  );
+  @override
+  late final GeneratedColumn<String> receiptUrl = GeneratedColumn<String>(
+    'receipt_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('synced'),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -789,15 +877,42 @@ class $LocalExpensesTable extends LocalExpenses
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
     userId,
     categoryId,
     amount,
+    currency,
     note,
     expenseDate,
+    receiptUrl,
+    syncStatus,
     createdAt,
+    updatedAt,
+    deletedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -838,6 +953,12 @@ class $LocalExpensesTable extends LocalExpenses
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    }
     if (data.containsKey('note')) {
       context.handle(
         _noteMeta,
@@ -855,6 +976,18 @@ class $LocalExpensesTable extends LocalExpenses
     } else if (isInserting) {
       context.missing(_expenseDateMeta);
     }
+    if (data.containsKey('receipt_url')) {
+      context.handle(
+        _receiptUrlMeta,
+        receiptUrl.isAcceptableOrUnknown(data['receipt_url']!, _receiptUrlMeta),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -862,6 +995,18 @@ class $LocalExpensesTable extends LocalExpenses
       );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
     }
     return context;
   }
@@ -888,6 +1033,10 @@ class $LocalExpensesTable extends LocalExpenses
         DriftSqlType.double,
         data['${effectivePrefix}amount'],
       )!,
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}note'],
@@ -896,10 +1045,26 @@ class $LocalExpensesTable extends LocalExpenses
         DriftSqlType.dateTime,
         data['${effectivePrefix}expense_date'],
       )!,
+      receiptUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}receipt_url'],
+      ),
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
     );
   }
 
@@ -914,17 +1079,27 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
   final String userId;
   final String? categoryId;
   final double amount;
+  final String currency;
   final String? note;
   final DateTime expenseDate;
+  final String? receiptUrl;
+  final String syncStatus;
   final DateTime createdAt;
+  final DateTime? updatedAt;
+  final DateTime? deletedAt;
   const LocalExpense({
     required this.id,
     required this.userId,
     this.categoryId,
     required this.amount,
+    required this.currency,
     this.note,
     required this.expenseDate,
+    this.receiptUrl,
+    required this.syncStatus,
     required this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -935,11 +1110,22 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
       map['category_id'] = Variable<String>(categoryId);
     }
     map['amount'] = Variable<double>(amount);
+    map['currency'] = Variable<String>(currency);
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
     map['expense_date'] = Variable<DateTime>(expenseDate);
+    if (!nullToAbsent || receiptUrl != null) {
+      map['receipt_url'] = Variable<String>(receiptUrl);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     return map;
   }
 
@@ -951,9 +1137,20 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
           ? const Value.absent()
           : Value(categoryId),
       amount: Value(amount),
+      currency: Value(currency),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       expenseDate: Value(expenseDate),
+      receiptUrl: receiptUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(receiptUrl),
+      syncStatus: Value(syncStatus),
       createdAt: Value(createdAt),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
     );
   }
 
@@ -967,9 +1164,14 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
       userId: serializer.fromJson<String>(json['userId']),
       categoryId: serializer.fromJson<String?>(json['categoryId']),
       amount: serializer.fromJson<double>(json['amount']),
+      currency: serializer.fromJson<String>(json['currency']),
       note: serializer.fromJson<String?>(json['note']),
       expenseDate: serializer.fromJson<DateTime>(json['expenseDate']),
+      receiptUrl: serializer.fromJson<String?>(json['receiptUrl']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
     );
   }
   @override
@@ -980,9 +1182,14 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
       'userId': serializer.toJson<String>(userId),
       'categoryId': serializer.toJson<String?>(categoryId),
       'amount': serializer.toJson<double>(amount),
+      'currency': serializer.toJson<String>(currency),
       'note': serializer.toJson<String?>(note),
       'expenseDate': serializer.toJson<DateTime>(expenseDate),
+      'receiptUrl': serializer.toJson<String?>(receiptUrl),
+      'syncStatus': serializer.toJson<String>(syncStatus),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
     };
   }
 
@@ -991,17 +1198,27 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
     String? userId,
     Value<String?> categoryId = const Value.absent(),
     double? amount,
+    String? currency,
     Value<String?> note = const Value.absent(),
     DateTime? expenseDate,
+    Value<String?> receiptUrl = const Value.absent(),
+    String? syncStatus,
     DateTime? createdAt,
+    Value<DateTime?> updatedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
   }) => LocalExpense(
     id: id ?? this.id,
     userId: userId ?? this.userId,
     categoryId: categoryId.present ? categoryId.value : this.categoryId,
     amount: amount ?? this.amount,
+    currency: currency ?? this.currency,
     note: note.present ? note.value : this.note,
     expenseDate: expenseDate ?? this.expenseDate,
+    receiptUrl: receiptUrl.present ? receiptUrl.value : this.receiptUrl,
+    syncStatus: syncStatus ?? this.syncStatus,
     createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
   );
   LocalExpense copyWithCompanion(LocalExpensesCompanion data) {
     return LocalExpense(
@@ -1011,11 +1228,20 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
           ? data.categoryId.value
           : this.categoryId,
       amount: data.amount.present ? data.amount.value : this.amount,
+      currency: data.currency.present ? data.currency.value : this.currency,
       note: data.note.present ? data.note.value : this.note,
       expenseDate: data.expenseDate.present
           ? data.expenseDate.value
           : this.expenseDate,
+      receiptUrl: data.receiptUrl.present
+          ? data.receiptUrl.value
+          : this.receiptUrl,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
     );
   }
 
@@ -1026,16 +1252,33 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
           ..write('userId: $userId, ')
           ..write('categoryId: $categoryId, ')
           ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
           ..write('note: $note, ')
           ..write('expenseDate: $expenseDate, ')
-          ..write('createdAt: $createdAt')
+          ..write('receiptUrl: $receiptUrl, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, userId, categoryId, amount, note, expenseDate, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    userId,
+    categoryId,
+    amount,
+    currency,
+    note,
+    expenseDate,
+    receiptUrl,
+    syncStatus,
+    createdAt,
+    updatedAt,
+    deletedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1044,9 +1287,14 @@ class LocalExpense extends DataClass implements Insertable<LocalExpense> {
           other.userId == this.userId &&
           other.categoryId == this.categoryId &&
           other.amount == this.amount &&
+          other.currency == this.currency &&
           other.note == this.note &&
           other.expenseDate == this.expenseDate &&
-          other.createdAt == this.createdAt);
+          other.receiptUrl == this.receiptUrl &&
+          other.syncStatus == this.syncStatus &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt &&
+          other.deletedAt == this.deletedAt);
 }
 
 class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
@@ -1054,18 +1302,28 @@ class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
   final Value<String> userId;
   final Value<String?> categoryId;
   final Value<double> amount;
+  final Value<String> currency;
   final Value<String?> note;
   final Value<DateTime> expenseDate;
+  final Value<String?> receiptUrl;
+  final Value<String> syncStatus;
   final Value<DateTime> createdAt;
+  final Value<DateTime?> updatedAt;
+  final Value<DateTime?> deletedAt;
   final Value<int> rowid;
   const LocalExpensesCompanion({
     this.id = const Value.absent(),
     this.userId = const Value.absent(),
     this.categoryId = const Value.absent(),
     this.amount = const Value.absent(),
+    this.currency = const Value.absent(),
     this.note = const Value.absent(),
     this.expenseDate = const Value.absent(),
+    this.receiptUrl = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LocalExpensesCompanion.insert({
@@ -1073,9 +1331,14 @@ class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
     required String userId,
     this.categoryId = const Value.absent(),
     required double amount,
+    this.currency = const Value.absent(),
     this.note = const Value.absent(),
     required DateTime expenseDate,
+    this.receiptUrl = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     required DateTime createdAt,
+    this.updatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        userId = Value(userId),
@@ -1087,9 +1350,14 @@ class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
     Expression<String>? userId,
     Expression<String>? categoryId,
     Expression<double>? amount,
+    Expression<String>? currency,
     Expression<String>? note,
     Expression<DateTime>? expenseDate,
+    Expression<String>? receiptUrl,
+    Expression<String>? syncStatus,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<DateTime>? deletedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1097,9 +1365,14 @@ class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
       if (userId != null) 'user_id': userId,
       if (categoryId != null) 'category_id': categoryId,
       if (amount != null) 'amount': amount,
+      if (currency != null) 'currency': currency,
       if (note != null) 'note': note,
       if (expenseDate != null) 'expense_date': expenseDate,
+      if (receiptUrl != null) 'receipt_url': receiptUrl,
+      if (syncStatus != null) 'sync_status': syncStatus,
       if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1109,9 +1382,14 @@ class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
     Value<String>? userId,
     Value<String?>? categoryId,
     Value<double>? amount,
+    Value<String>? currency,
     Value<String?>? note,
     Value<DateTime>? expenseDate,
+    Value<String?>? receiptUrl,
+    Value<String>? syncStatus,
     Value<DateTime>? createdAt,
+    Value<DateTime?>? updatedAt,
+    Value<DateTime?>? deletedAt,
     Value<int>? rowid,
   }) {
     return LocalExpensesCompanion(
@@ -1119,9 +1397,14 @@ class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
       userId: userId ?? this.userId,
       categoryId: categoryId ?? this.categoryId,
       amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
       note: note ?? this.note,
       expenseDate: expenseDate ?? this.expenseDate,
+      receiptUrl: receiptUrl ?? this.receiptUrl,
+      syncStatus: syncStatus ?? this.syncStatus,
       createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1141,14 +1424,29 @@ class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
     if (amount.present) {
       map['amount'] = Variable<double>(amount.value);
     }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
     if (expenseDate.present) {
       map['expense_date'] = Variable<DateTime>(expenseDate.value);
     }
+    if (receiptUrl.present) {
+      map['receipt_url'] = Variable<String>(receiptUrl.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1163,9 +1461,14 @@ class LocalExpensesCompanion extends UpdateCompanion<LocalExpense> {
           ..write('userId: $userId, ')
           ..write('categoryId: $categoryId, ')
           ..write('amount: $amount, ')
+          ..write('currency: $currency, ')
           ..write('note: $note, ')
           ..write('expenseDate: $expenseDate, ')
+          ..write('receiptUrl: $receiptUrl, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1953,32 +2256,32 @@ class $SyncQueueTable extends SyncQueue
       'PRIMARY KEY AUTOINCREMENT',
     ),
   );
-  static const VerificationMeta _actionMeta = const VerificationMeta('action');
+  static const VerificationMeta _entityMeta = const VerificationMeta('entity');
   @override
-  late final GeneratedColumn<String> action = GeneratedColumn<String>(
-    'action',
+  late final GeneratedColumn<String> entity = GeneratedColumn<String>(
+    'entity',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _targetTableMeta = const VerificationMeta(
-    'targetTable',
+  static const VerificationMeta _entityIdMeta = const VerificationMeta(
+    'entityId',
   );
   @override
-  late final GeneratedColumn<String> targetTable = GeneratedColumn<String>(
-    'target_table',
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
+    'entity_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _recordIdMeta = const VerificationMeta(
-    'recordId',
+  static const VerificationMeta _operationMeta = const VerificationMeta(
+    'operation',
   );
   @override
-  late final GeneratedColumn<String> recordId = GeneratedColumn<String>(
-    'record_id',
+  late final GeneratedColumn<String> operation = GeneratedColumn<String>(
+    'operation',
     aliasedName,
     false,
     type: DriftSqlType.string,
@@ -1995,6 +2298,18 @@ class $SyncQueueTable extends SyncQueue
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _retryCountMeta = const VerificationMeta(
+    'retryCount',
+  );
+  @override
+  late final GeneratedColumn<int> retryCount = GeneratedColumn<int>(
+    'retry_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -2007,14 +2322,27 @@ class $SyncQueueTable extends SyncQueue
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _lastAttemptMeta = const VerificationMeta(
+    'lastAttempt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastAttempt = GeneratedColumn<DateTime>(
+    'last_attempt',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
-    action,
-    targetTable,
-    recordId,
+    entity,
+    entityId,
+    operation,
     payload,
+    retryCount,
     createdAt,
+    lastAttempt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2031,32 +2359,29 @@ class $SyncQueueTable extends SyncQueue
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('action')) {
+    if (data.containsKey('entity')) {
       context.handle(
-        _actionMeta,
-        action.isAcceptableOrUnknown(data['action']!, _actionMeta),
+        _entityMeta,
+        entity.isAcceptableOrUnknown(data['entity']!, _entityMeta),
       );
     } else if (isInserting) {
-      context.missing(_actionMeta);
+      context.missing(_entityMeta);
     }
-    if (data.containsKey('target_table')) {
+    if (data.containsKey('entity_id')) {
       context.handle(
-        _targetTableMeta,
-        targetTable.isAcceptableOrUnknown(
-          data['target_table']!,
-          _targetTableMeta,
-        ),
+        _entityIdMeta,
+        entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta),
       );
     } else if (isInserting) {
-      context.missing(_targetTableMeta);
+      context.missing(_entityIdMeta);
     }
-    if (data.containsKey('record_id')) {
+    if (data.containsKey('operation')) {
       context.handle(
-        _recordIdMeta,
-        recordId.isAcceptableOrUnknown(data['record_id']!, _recordIdMeta),
+        _operationMeta,
+        operation.isAcceptableOrUnknown(data['operation']!, _operationMeta),
       );
     } else if (isInserting) {
-      context.missing(_recordIdMeta);
+      context.missing(_operationMeta);
     }
     if (data.containsKey('payload')) {
       context.handle(
@@ -2066,10 +2391,25 @@ class $SyncQueueTable extends SyncQueue
     } else if (isInserting) {
       context.missing(_payloadMeta);
     }
+    if (data.containsKey('retry_count')) {
+      context.handle(
+        _retryCountMeta,
+        retryCount.isAcceptableOrUnknown(data['retry_count']!, _retryCountMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
         createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('last_attempt')) {
+      context.handle(
+        _lastAttemptMeta,
+        lastAttempt.isAcceptableOrUnknown(
+          data['last_attempt']!,
+          _lastAttemptMeta,
+        ),
       );
     }
     return context;
@@ -2085,26 +2425,34 @@ class $SyncQueueTable extends SyncQueue
         DriftSqlType.int,
         data['${effectivePrefix}id'],
       )!,
-      action: attachedDatabase.typeMapping.read(
+      entity: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}action'],
+        data['${effectivePrefix}entity'],
       )!,
-      targetTable: attachedDatabase.typeMapping.read(
+      entityId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}target_table'],
+        data['${effectivePrefix}entity_id'],
       )!,
-      recordId: attachedDatabase.typeMapping.read(
+      operation: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}record_id'],
+        data['${effectivePrefix}operation'],
       )!,
       payload: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}payload'],
       )!,
+      retryCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}retry_count'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
       )!,
+      lastAttempt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_attempt'],
+      ),
     );
   }
 
@@ -2116,39 +2464,51 @@ class $SyncQueueTable extends SyncQueue
 
 class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   final int id;
-  final String action;
-  final String targetTable;
-  final String recordId;
+  final String entity;
+  final String entityId;
+  final String operation;
   final String payload;
+  final int retryCount;
   final DateTime createdAt;
+  final DateTime? lastAttempt;
   const SyncQueueData({
     required this.id,
-    required this.action,
-    required this.targetTable,
-    required this.recordId,
+    required this.entity,
+    required this.entityId,
+    required this.operation,
     required this.payload,
+    required this.retryCount,
     required this.createdAt,
+    this.lastAttempt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['action'] = Variable<String>(action);
-    map['target_table'] = Variable<String>(targetTable);
-    map['record_id'] = Variable<String>(recordId);
+    map['entity'] = Variable<String>(entity);
+    map['entity_id'] = Variable<String>(entityId);
+    map['operation'] = Variable<String>(operation);
     map['payload'] = Variable<String>(payload);
+    map['retry_count'] = Variable<int>(retryCount);
     map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || lastAttempt != null) {
+      map['last_attempt'] = Variable<DateTime>(lastAttempt);
+    }
     return map;
   }
 
   SyncQueueCompanion toCompanion(bool nullToAbsent) {
     return SyncQueueCompanion(
       id: Value(id),
-      action: Value(action),
-      targetTable: Value(targetTable),
-      recordId: Value(recordId),
+      entity: Value(entity),
+      entityId: Value(entityId),
+      operation: Value(operation),
       payload: Value(payload),
+      retryCount: Value(retryCount),
       createdAt: Value(createdAt),
+      lastAttempt: lastAttempt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastAttempt),
     );
   }
 
@@ -2159,11 +2519,13 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SyncQueueData(
       id: serializer.fromJson<int>(json['id']),
-      action: serializer.fromJson<String>(json['action']),
-      targetTable: serializer.fromJson<String>(json['targetTable']),
-      recordId: serializer.fromJson<String>(json['recordId']),
+      entity: serializer.fromJson<String>(json['entity']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      operation: serializer.fromJson<String>(json['operation']),
       payload: serializer.fromJson<String>(json['payload']),
+      retryCount: serializer.fromJson<int>(json['retryCount']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastAttempt: serializer.fromJson<DateTime?>(json['lastAttempt']),
     );
   }
   @override
@@ -2171,39 +2533,49 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'action': serializer.toJson<String>(action),
-      'targetTable': serializer.toJson<String>(targetTable),
-      'recordId': serializer.toJson<String>(recordId),
+      'entity': serializer.toJson<String>(entity),
+      'entityId': serializer.toJson<String>(entityId),
+      'operation': serializer.toJson<String>(operation),
       'payload': serializer.toJson<String>(payload),
+      'retryCount': serializer.toJson<int>(retryCount),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastAttempt': serializer.toJson<DateTime?>(lastAttempt),
     };
   }
 
   SyncQueueData copyWith({
     int? id,
-    String? action,
-    String? targetTable,
-    String? recordId,
+    String? entity,
+    String? entityId,
+    String? operation,
     String? payload,
+    int? retryCount,
     DateTime? createdAt,
+    Value<DateTime?> lastAttempt = const Value.absent(),
   }) => SyncQueueData(
     id: id ?? this.id,
-    action: action ?? this.action,
-    targetTable: targetTable ?? this.targetTable,
-    recordId: recordId ?? this.recordId,
+    entity: entity ?? this.entity,
+    entityId: entityId ?? this.entityId,
+    operation: operation ?? this.operation,
     payload: payload ?? this.payload,
+    retryCount: retryCount ?? this.retryCount,
     createdAt: createdAt ?? this.createdAt,
+    lastAttempt: lastAttempt.present ? lastAttempt.value : this.lastAttempt,
   );
   SyncQueueData copyWithCompanion(SyncQueueCompanion data) {
     return SyncQueueData(
       id: data.id.present ? data.id.value : this.id,
-      action: data.action.present ? data.action.value : this.action,
-      targetTable: data.targetTable.present
-          ? data.targetTable.value
-          : this.targetTable,
-      recordId: data.recordId.present ? data.recordId.value : this.recordId,
+      entity: data.entity.present ? data.entity.value : this.entity,
+      entityId: data.entityId.present ? data.entityId.value : this.entityId,
+      operation: data.operation.present ? data.operation.value : this.operation,
       payload: data.payload.present ? data.payload.value : this.payload,
+      retryCount: data.retryCount.present
+          ? data.retryCount.value
+          : this.retryCount,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastAttempt: data.lastAttempt.present
+          ? data.lastAttempt.value
+          : this.lastAttempt,
     );
   }
 
@@ -2211,89 +2583,115 @@ class SyncQueueData extends DataClass implements Insertable<SyncQueueData> {
   String toString() {
     return (StringBuffer('SyncQueueData(')
           ..write('id: $id, ')
-          ..write('action: $action, ')
-          ..write('targetTable: $targetTable, ')
-          ..write('recordId: $recordId, ')
+          ..write('entity: $entity, ')
+          ..write('entityId: $entityId, ')
+          ..write('operation: $operation, ')
           ..write('payload: $payload, ')
-          ..write('createdAt: $createdAt')
+          ..write('retryCount: $retryCount, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastAttempt: $lastAttempt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, action, targetTable, recordId, payload, createdAt);
+  int get hashCode => Object.hash(
+    id,
+    entity,
+    entityId,
+    operation,
+    payload,
+    retryCount,
+    createdAt,
+    lastAttempt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SyncQueueData &&
           other.id == this.id &&
-          other.action == this.action &&
-          other.targetTable == this.targetTable &&
-          other.recordId == this.recordId &&
+          other.entity == this.entity &&
+          other.entityId == this.entityId &&
+          other.operation == this.operation &&
           other.payload == this.payload &&
-          other.createdAt == this.createdAt);
+          other.retryCount == this.retryCount &&
+          other.createdAt == this.createdAt &&
+          other.lastAttempt == this.lastAttempt);
 }
 
 class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   final Value<int> id;
-  final Value<String> action;
-  final Value<String> targetTable;
-  final Value<String> recordId;
+  final Value<String> entity;
+  final Value<String> entityId;
+  final Value<String> operation;
   final Value<String> payload;
+  final Value<int> retryCount;
   final Value<DateTime> createdAt;
+  final Value<DateTime?> lastAttempt;
   const SyncQueueCompanion({
     this.id = const Value.absent(),
-    this.action = const Value.absent(),
-    this.targetTable = const Value.absent(),
-    this.recordId = const Value.absent(),
+    this.entity = const Value.absent(),
+    this.entityId = const Value.absent(),
+    this.operation = const Value.absent(),
     this.payload = const Value.absent(),
+    this.retryCount = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.lastAttempt = const Value.absent(),
   });
   SyncQueueCompanion.insert({
     this.id = const Value.absent(),
-    required String action,
-    required String targetTable,
-    required String recordId,
+    required String entity,
+    required String entityId,
+    required String operation,
     required String payload,
+    this.retryCount = const Value.absent(),
     this.createdAt = const Value.absent(),
-  }) : action = Value(action),
-       targetTable = Value(targetTable),
-       recordId = Value(recordId),
+    this.lastAttempt = const Value.absent(),
+  }) : entity = Value(entity),
+       entityId = Value(entityId),
+       operation = Value(operation),
        payload = Value(payload);
   static Insertable<SyncQueueData> custom({
     Expression<int>? id,
-    Expression<String>? action,
-    Expression<String>? targetTable,
-    Expression<String>? recordId,
+    Expression<String>? entity,
+    Expression<String>? entityId,
+    Expression<String>? operation,
     Expression<String>? payload,
+    Expression<int>? retryCount,
     Expression<DateTime>? createdAt,
+    Expression<DateTime>? lastAttempt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (action != null) 'action': action,
-      if (targetTable != null) 'target_table': targetTable,
-      if (recordId != null) 'record_id': recordId,
+      if (entity != null) 'entity': entity,
+      if (entityId != null) 'entity_id': entityId,
+      if (operation != null) 'operation': operation,
       if (payload != null) 'payload': payload,
+      if (retryCount != null) 'retry_count': retryCount,
       if (createdAt != null) 'created_at': createdAt,
+      if (lastAttempt != null) 'last_attempt': lastAttempt,
     });
   }
 
   SyncQueueCompanion copyWith({
     Value<int>? id,
-    Value<String>? action,
-    Value<String>? targetTable,
-    Value<String>? recordId,
+    Value<String>? entity,
+    Value<String>? entityId,
+    Value<String>? operation,
     Value<String>? payload,
+    Value<int>? retryCount,
     Value<DateTime>? createdAt,
+    Value<DateTime?>? lastAttempt,
   }) {
     return SyncQueueCompanion(
       id: id ?? this.id,
-      action: action ?? this.action,
-      targetTable: targetTable ?? this.targetTable,
-      recordId: recordId ?? this.recordId,
+      entity: entity ?? this.entity,
+      entityId: entityId ?? this.entityId,
+      operation: operation ?? this.operation,
       payload: payload ?? this.payload,
+      retryCount: retryCount ?? this.retryCount,
       createdAt: createdAt ?? this.createdAt,
+      lastAttempt: lastAttempt ?? this.lastAttempt,
     );
   }
 
@@ -2303,20 +2701,26 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (action.present) {
-      map['action'] = Variable<String>(action.value);
+    if (entity.present) {
+      map['entity'] = Variable<String>(entity.value);
     }
-    if (targetTable.present) {
-      map['target_table'] = Variable<String>(targetTable.value);
+    if (entityId.present) {
+      map['entity_id'] = Variable<String>(entityId.value);
     }
-    if (recordId.present) {
-      map['record_id'] = Variable<String>(recordId.value);
+    if (operation.present) {
+      map['operation'] = Variable<String>(operation.value);
     }
     if (payload.present) {
       map['payload'] = Variable<String>(payload.value);
     }
+    if (retryCount.present) {
+      map['retry_count'] = Variable<int>(retryCount.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (lastAttempt.present) {
+      map['last_attempt'] = Variable<DateTime>(lastAttempt.value);
     }
     return map;
   }
@@ -2325,11 +2729,13 @@ class SyncQueueCompanion extends UpdateCompanion<SyncQueueData> {
   String toString() {
     return (StringBuffer('SyncQueueCompanion(')
           ..write('id: $id, ')
-          ..write('action: $action, ')
-          ..write('targetTable: $targetTable, ')
-          ..write('recordId: $recordId, ')
+          ..write('entity: $entity, ')
+          ..write('entityId: $entityId, ')
+          ..write('operation: $operation, ')
           ..write('payload: $payload, ')
-          ..write('createdAt: $createdAt')
+          ..write('retryCount: $retryCount, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastAttempt: $lastAttempt')
           ..write(')'))
         .toString();
   }
@@ -2566,6 +2972,7 @@ typedef $$LocalCategoriesTableCreateCompanionBuilder =
       required String name,
       required String icon,
       required int color,
+      Value<String> syncStatus,
       Value<int> rowid,
     });
 typedef $$LocalCategoriesTableUpdateCompanionBuilder =
@@ -2575,6 +2982,7 @@ typedef $$LocalCategoriesTableUpdateCompanionBuilder =
       Value<String> name,
       Value<String> icon,
       Value<int> color,
+      Value<String> syncStatus,
       Value<int> rowid,
     });
 
@@ -2609,6 +3017,11 @@ class $$LocalCategoriesTableFilterComposer
 
   ColumnFilters<int> get color => $composableBuilder(
     column: $table.color,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2646,6 +3059,11 @@ class $$LocalCategoriesTableOrderingComposer
     column: $table.color,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$LocalCategoriesTableAnnotationComposer
@@ -2671,6 +3089,11 @@ class $$LocalCategoriesTableAnnotationComposer
 
   GeneratedColumn<int> get color =>
       $composableBuilder(column: $table.color, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
 }
 
 class $$LocalCategoriesTableTableManager
@@ -2711,6 +3134,7 @@ class $$LocalCategoriesTableTableManager
                 Value<String> name = const Value.absent(),
                 Value<String> icon = const Value.absent(),
                 Value<int> color = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalCategoriesCompanion(
                 id: id,
@@ -2718,6 +3142,7 @@ class $$LocalCategoriesTableTableManager
                 name: name,
                 icon: icon,
                 color: color,
+                syncStatus: syncStatus,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2727,6 +3152,7 @@ class $$LocalCategoriesTableTableManager
                 required String name,
                 required String icon,
                 required int color,
+                Value<String> syncStatus = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalCategoriesCompanion.insert(
                 id: id,
@@ -2734,6 +3160,7 @@ class $$LocalCategoriesTableTableManager
                 name: name,
                 icon: icon,
                 color: color,
+                syncStatus: syncStatus,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -2767,9 +3194,14 @@ typedef $$LocalExpensesTableCreateCompanionBuilder =
       required String userId,
       Value<String?> categoryId,
       required double amount,
+      Value<String> currency,
       Value<String?> note,
       required DateTime expenseDate,
+      Value<String?> receiptUrl,
+      Value<String> syncStatus,
       required DateTime createdAt,
+      Value<DateTime?> updatedAt,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 typedef $$LocalExpensesTableUpdateCompanionBuilder =
@@ -2778,9 +3210,14 @@ typedef $$LocalExpensesTableUpdateCompanionBuilder =
       Value<String> userId,
       Value<String?> categoryId,
       Value<double> amount,
+      Value<String> currency,
       Value<String?> note,
       Value<DateTime> expenseDate,
+      Value<String?> receiptUrl,
+      Value<String> syncStatus,
       Value<DateTime> createdAt,
+      Value<DateTime?> updatedAt,
+      Value<DateTime?> deletedAt,
       Value<int> rowid,
     });
 
@@ -2813,6 +3250,11 @@ class $$LocalExpensesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnFilters(column),
@@ -2823,8 +3265,28 @@ class $$LocalExpensesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get receiptUrl => $composableBuilder(
+    column: $table.receiptUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -2858,6 +3320,11 @@ class $$LocalExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnOrderings(column),
@@ -2868,8 +3335,28 @@ class $$LocalExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get receiptUrl => $composableBuilder(
+    column: $table.receiptUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -2897,6 +3384,9 @@ class $$LocalExpensesTableAnnotationComposer
   GeneratedColumn<double> get amount =>
       $composableBuilder(column: $table.amount, builder: (column) => column);
 
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
 
@@ -2905,8 +3395,24 @@ class $$LocalExpensesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get receiptUrl => $composableBuilder(
+    column: $table.receiptUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 }
 
 class $$LocalExpensesTableTableManager
@@ -2944,18 +3450,28 @@ class $$LocalExpensesTableTableManager
                 Value<String> userId = const Value.absent(),
                 Value<String?> categoryId = const Value.absent(),
                 Value<double> amount = const Value.absent(),
+                Value<String> currency = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> expenseDate = const Value.absent(),
+                Value<String?> receiptUrl = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalExpensesCompanion(
                 id: id,
                 userId: userId,
                 categoryId: categoryId,
                 amount: amount,
+                currency: currency,
                 note: note,
                 expenseDate: expenseDate,
+                receiptUrl: receiptUrl,
+                syncStatus: syncStatus,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2964,18 +3480,28 @@ class $$LocalExpensesTableTableManager
                 required String userId,
                 Value<String?> categoryId = const Value.absent(),
                 required double amount,
+                Value<String> currency = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 required DateTime expenseDate,
+                Value<String?> receiptUrl = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
                 required DateTime createdAt,
+                Value<DateTime?> updatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LocalExpensesCompanion.insert(
                 id: id,
                 userId: userId,
                 categoryId: categoryId,
                 amount: amount,
+                currency: currency,
                 note: note,
                 expenseDate: expenseDate,
+                receiptUrl: receiptUrl,
+                syncStatus: syncStatus,
                 createdAt: createdAt,
+                updatedAt: updatedAt,
+                deletedAt: deletedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3429,20 +3955,24 @@ typedef $$LocalBudgetsTableProcessedTableManager =
 typedef $$SyncQueueTableCreateCompanionBuilder =
     SyncQueueCompanion Function({
       Value<int> id,
-      required String action,
-      required String targetTable,
-      required String recordId,
+      required String entity,
+      required String entityId,
+      required String operation,
       required String payload,
+      Value<int> retryCount,
       Value<DateTime> createdAt,
+      Value<DateTime?> lastAttempt,
     });
 typedef $$SyncQueueTableUpdateCompanionBuilder =
     SyncQueueCompanion Function({
       Value<int> id,
-      Value<String> action,
-      Value<String> targetTable,
-      Value<String> recordId,
+      Value<String> entity,
+      Value<String> entityId,
+      Value<String> operation,
       Value<String> payload,
+      Value<int> retryCount,
       Value<DateTime> createdAt,
+      Value<DateTime?> lastAttempt,
     });
 
 class $$SyncQueueTableFilterComposer
@@ -3459,18 +3989,18 @@ class $$SyncQueueTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get action => $composableBuilder(
-    column: $table.action,
+  ColumnFilters<String> get entity => $composableBuilder(
+    column: $table.entity,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get targetTable => $composableBuilder(
-    column: $table.targetTable,
+  ColumnFilters<String> get entityId => $composableBuilder(
+    column: $table.entityId,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get recordId => $composableBuilder(
-    column: $table.recordId,
+  ColumnFilters<String> get operation => $composableBuilder(
+    column: $table.operation,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3479,8 +4009,18 @@ class $$SyncQueueTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastAttempt => $composableBuilder(
+    column: $table.lastAttempt,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3499,18 +4039,18 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get action => $composableBuilder(
-    column: $table.action,
+  ColumnOrderings<String> get entity => $composableBuilder(
+    column: $table.entity,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get targetTable => $composableBuilder(
-    column: $table.targetTable,
+  ColumnOrderings<String> get entityId => $composableBuilder(
+    column: $table.entityId,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get recordId => $composableBuilder(
-    column: $table.recordId,
+  ColumnOrderings<String> get operation => $composableBuilder(
+    column: $table.operation,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -3519,8 +4059,18 @@ class $$SyncQueueTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastAttempt => $composableBuilder(
+    column: $table.lastAttempt,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -3537,22 +4087,30 @@ class $$SyncQueueTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get action =>
-      $composableBuilder(column: $table.action, builder: (column) => column);
+  GeneratedColumn<String> get entity =>
+      $composableBuilder(column: $table.entity, builder: (column) => column);
 
-  GeneratedColumn<String> get targetTable => $composableBuilder(
-    column: $table.targetTable,
-    builder: (column) => column,
-  );
+  GeneratedColumn<String> get entityId =>
+      $composableBuilder(column: $table.entityId, builder: (column) => column);
 
-  GeneratedColumn<String> get recordId =>
-      $composableBuilder(column: $table.recordId, builder: (column) => column);
+  GeneratedColumn<String> get operation =>
+      $composableBuilder(column: $table.operation, builder: (column) => column);
 
   GeneratedColumn<String> get payload =>
       $composableBuilder(column: $table.payload, builder: (column) => column);
 
+  GeneratedColumn<int> get retryCount => $composableBuilder(
+    column: $table.retryCount,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastAttempt => $composableBuilder(
+    column: $table.lastAttempt,
+    builder: (column) => column,
+  );
 }
 
 class $$SyncQueueTableTableManager
@@ -3587,34 +4145,42 @@ class $$SyncQueueTableTableManager
           updateCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                Value<String> action = const Value.absent(),
-                Value<String> targetTable = const Value.absent(),
-                Value<String> recordId = const Value.absent(),
+                Value<String> entity = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
+                Value<String> operation = const Value.absent(),
                 Value<String> payload = const Value.absent(),
+                Value<int> retryCount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> lastAttempt = const Value.absent(),
               }) => SyncQueueCompanion(
                 id: id,
-                action: action,
-                targetTable: targetTable,
-                recordId: recordId,
+                entity: entity,
+                entityId: entityId,
+                operation: operation,
                 payload: payload,
+                retryCount: retryCount,
                 createdAt: createdAt,
+                lastAttempt: lastAttempt,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
-                required String action,
-                required String targetTable,
-                required String recordId,
+                required String entity,
+                required String entityId,
+                required String operation,
                 required String payload,
+                Value<int> retryCount = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> lastAttempt = const Value.absent(),
               }) => SyncQueueCompanion.insert(
                 id: id,
-                action: action,
-                targetTable: targetTable,
-                recordId: recordId,
+                entity: entity,
+                entityId: entityId,
+                operation: operation,
                 payload: payload,
+                retryCount: retryCount,
                 createdAt: createdAt,
+                lastAttempt: lastAttempt,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

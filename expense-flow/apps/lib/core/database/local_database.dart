@@ -23,6 +23,7 @@ class LocalCategories extends Table {
   TextColumn get name => text()();
   TextColumn get icon => text()();
   IntColumn get color => integer()();
+  TextColumn get syncStatus => text().withDefault(const Constant('synced'))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -33,9 +34,14 @@ class LocalExpenses extends Table {
   TextColumn get userId => text()();
   TextColumn get categoryId => text().nullable()();
   RealColumn get amount => real()();
+  TextColumn get currency => text().withDefault(const Constant('USD'))();
   TextColumn get note => text().nullable()();
   DateTimeColumn get expenseDate => dateTime()();
+  TextColumn get receiptUrl => text().nullable()();
+  TextColumn get syncStatus => text().withDefault(const Constant('synced'))();
   DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get deletedAt => dateTime().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -66,11 +72,13 @@ class LocalBudgets extends Table {
 
 class SyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get action => text()(); // 'INSERT', 'UPDATE', 'DELETE'
-  TextColumn get targetTable => text()(); // 'expenses', 'categories', etc.
-  TextColumn get recordId => text()();
-  TextColumn get payload => text()(); // JSON payload
+  TextColumn get entity => text()(); // 'expenses', 'categories', etc.
+  TextColumn get entityId => text()();
+  TextColumn get operation => text()(); // 'CREATE', 'UPDATE', 'DELETE'
+  TextColumn get payload => text()(); // JSON string
+  IntColumn get retryCount => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get lastAttempt => dateTime().nullable()();
 }
 
 @DriftDatabase(tables: [
@@ -85,7 +93,26 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) async {
+          await m.createAll();
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.drop(localExpenses);
+            await m.drop(syncQueue);
+            await m.create(localExpenses);
+            await m.create(syncQueue);
+          }
+          if (from < 3) {
+            await m.drop(localCategories);
+            await m.create(localCategories);
+          }
+        },
+      );
 }
 
 QueryExecutor _openConnection() {
