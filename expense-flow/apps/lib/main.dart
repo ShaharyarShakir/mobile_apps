@@ -9,10 +9,12 @@ void main() {
 
   final testExpense = Expense(
     id: 'test-id',
+    userId: 'system-user',
     amount: 0,
     currency: 'USD',
     expenseDate: DateTime.now(),
     note: 'Initial Test',
+    createdAt: DateTime.now(),
   );
   debugPrint('Bootstrapping ExpenseFlow with test expense: ${testExpense.id}');
 
