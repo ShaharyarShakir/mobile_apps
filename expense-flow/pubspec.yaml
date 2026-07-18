@@ -4,7 +4,7 @@ environment:
   sdk: ">=3.12.2 <4.0.0"
 
 workspace:
-  - apps/mobile
+  - apps
   - backend/api
   - packages/api_client
   - packages/shared_models
@@ -12,3 +12,6 @@ workspace:
 
 dev_dependencies:
   melos: ^8.2.2
+
+dependency_overrides:
+  cli_util: ^0.5.0
