@@ -1,14 +1,14 @@
 import 'dart:io';
-import 'package:api/database/db_context.dart';
-import 'package:api/database/migrate.dart';
-import 'package:api/database/seeds/seeds.dart';
+import 'package:api/app/database/connection.dart';
+import 'package:api/app/database/migration.dart';
+import 'package:api/app/database/seed.dart';
 
 void main() async {
   final host = Platform.environment['DATABASE_HOST'] ?? 'localhost';
   final port = int.tryParse(Platform.environment['DATABASE_PORT'] ?? '5432') ?? 5432;
   print('Connecting to database on $host:$port...');
-  
-  final pool = DbContext.createPool();
+
+  final pool = DatabaseConnection.createPool();
 
   try {
     print('Running migrations...');
