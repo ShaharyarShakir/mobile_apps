@@ -1,0 +1,2 @@
+# WanderWise
+ An AI-powered travel companion that creates personalized itineraries, recommends attractions, restaurants, and hidden gems, adapts plans in real time based on weather, budget, opening hours, and current location, and helps travelers navigate unfamiliar cities without spending hours researching.
