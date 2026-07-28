@@ -1,0 +1,13 @@
+name: shared_utils
+description: Shared validation and utilities
+version: 0.0.1
+resolution: workspace
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  intl: ^0.20.2
+
+dev_dependencies:
+  lints: ^6.0.0
