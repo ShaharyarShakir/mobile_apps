@@ -1,5 +1,5 @@
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
 
@@ -32,4 +32,10 @@ class User(Base):
     is_superuser: Mapped[bool] = mapped_column(
         default=False,
         nullable=False,
+    )
+
+    memberships: Mapped[list["WorkspaceMember"]] = relationship(  # type: ignore # noqa: F821
+        "WorkspaceMember",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
