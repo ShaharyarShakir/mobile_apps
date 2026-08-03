@@ -1,5 +1,6 @@
 import asyncio
 from collections.abc import AsyncGenerator
+from typing import Any
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -62,3 +63,63 @@ async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient]:
 
     # Clean up overrides
     app.dependency_overrides.clear()
+
+
+class MockRedisPipeline:
+    def __init__(self, mock_redis) -> None:
+        self.mock_redis = mock_redis
+        self.commands = []
+
+    def incr(self, key: str):
+        self.commands.append(("incr", key))
+        return self
+
+    def expire(self, key: str, seconds: int):
+        self.commands.append(("expire", key, seconds))
+        return self
+
+    async def execute(self) -> list[Any]:
+        results = []
+        for cmd, *args in self.commands:
+            if cmd == "incr":
+                key = args[0]
+                val = int(self.mock_redis.store.get(key, 0)) + 1
+                self.mock_redis.store[key] = str(val)
+                results.append(val)
+            elif cmd == "expire":
+                results.append(True)
+        return results
+
+
+class MockRedis:
+    def __init__(self) -> None:
+        self.store = {}
+
+    async def ping(self) -> bool:
+        return True
+
+    async def get(self, key: str) -> str | None:
+        return self.store.get(key)
+
+    async def setex(self, key: str, _time: int, value: str) -> None:
+        self.store[key] = str(value)
+
+    async def delete(self, *keys: str) -> None:
+        for key in keys:
+            self.store.pop(key, None)
+
+    async def close(self) -> None:
+        pass
+
+    def pipeline(self):
+        return MockRedisPipeline(self)
+
+
+@pytest.fixture(autouse=True)
+def mock_redis(monkeypatch) -> MockRedis:
+    mock = MockRedis()
+    monkeypatch.setattr("app.redis_client.redis_client", mock)
+    monkeypatch.setattr("app.core.rate_limiter.redis_client", mock)
+    monkeypatch.setattr("app.services.auth.redis_client", mock)
+    monkeypatch.setattr("app.api.v1.auth.redis_client", mock)
+    return mock
