@@ -21,7 +21,10 @@ class UserService:
         return await user_repository.get_by_email(db, email)
 
     async def create(self, db: AsyncSession, user_in: UserCreate) -> User:
-        """Register a new user in the database, hashing their password."""
+        """Register a new user in the database, hashing their password.
+
+        Also automatically creates a default workspace and assigns the user as Owner.
+        """
         existing_user = await user_repository.get_by_email(db, user_in.email)
         if existing_user:
             raise HTTPException(
@@ -30,11 +33,35 @@ class UserService:
             )
 
         hashed_password = get_password_hash(user_in.password)
-        # Convert schema to dict, overwrite password with hashed_password
         obj_data = user_in.model_dump(exclude={"password"})
         obj_data["hashed_password"] = hashed_password
 
-        return await user_repository.create(db, obj_in=obj_data)
+        # Generate IDs manually to prevent null constraints before flush
+        user_id = uuid.uuid4()
+        workspace_id = uuid.uuid4()
+
+        # Create user instance and add to session
+        db_user = User(id=user_id, **obj_data)
+        db.add(db_user)
+
+        # Create default workspace and member in the same transaction
+        from app.models.workspace import Workspace
+        from app.models.workspace_member import WorkspaceMember
+
+        workspace_name = f"{db_user.full_name or 'Personal'}'s Workspace"
+        db_workspace = Workspace(id=workspace_id, name=workspace_name)
+        db.add(db_workspace)
+
+        db_member = WorkspaceMember(
+            workspace_id=workspace_id,
+            user_id=user_id,
+            role="Owner",
+        )
+        db.add(db_member)
+
+        await db.commit()
+        await db.refresh(db_user)
+        return db_user
 
     async def update(self, db: AsyncSession, db_obj: User, user_in: UserUpdate) -> User:
         """Update user settings, hashing the password if it is changed."""
