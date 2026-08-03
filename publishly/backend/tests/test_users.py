@@ -33,4 +33,4 @@ async def test_user_registration_and_retrieval(client: AsyncClient) -> None:
     # 4. Prevent duplicate registration
     response = await client.post("/api/v1/users/", json=user_payload)
     assert response.status_code == 400
-    assert "exists" in response.json()["detail"]
+    assert "exists" in response.json()["message"]
