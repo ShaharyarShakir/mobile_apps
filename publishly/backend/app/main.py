@@ -2,8 +2,10 @@ import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
 from app.config import settings
@@ -53,6 +55,52 @@ app.add_middleware(
 
 # Register main API router under prefix (e.g. /api/v1)
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(_request: Request, exc: HTTPException) -> JSONResponse:
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "message": exc.detail,
+            "data": None,
+        },
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    _request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    errors = exc.errors()
+    message = "Validation failed: " + "; ".join(
+        [f"{'.'.join(str(loc) for loc in err['loc'])}: {err['msg']}" for err in errors]
+    )
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "message": message,
+            "data": {"errors": errors},
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(_request: Request, exc: Exception) -> JSONResponse:
+    logger.exception(f"Unhandled exception occurred: {exc}")
+    message = (
+        str(exc) if settings.ENVIRONMENT == "development" else "Internal server error."
+    )
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "message": message,
+            "data": None,
+        },
+    )
 
 
 @app.get("/")
