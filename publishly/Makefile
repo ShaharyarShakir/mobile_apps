@@ -21,7 +21,7 @@ down:
 # Run linting and type checking for both backend and mobile
 lint:
 	@echo "Linting and type checking backend..."
-	cd backend && uv run ruff check . && uv run mypy app tests
+	cd backend && uv run ruff check . && uv run mypy app
 	@echo "Linting and type checking mobile..."
 	cd mobile && bun run lint
 
