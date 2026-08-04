@@ -1,0 +1,13 @@
+{
+  "name": "wanderwise",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "backend": "cd backend && go run github.com/air-verse/air@latest",
+    "frontend": "cd mobile && bun run start",
+    "dev": "concurrently \"bun   run backend\" \"bun run frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
