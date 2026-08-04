@@ -1,0 +1,25 @@
+{
+  "name": "@study-better-t/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@better-auth/expo": "catalog:",
+    "@study-better-t/db": "workspace:*",
+    "@study-better-t/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@study-better-t/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
