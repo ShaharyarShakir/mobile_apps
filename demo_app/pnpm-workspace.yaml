@@ -1,0 +1,5 @@
+allowBuilds:
+  '@nativescript/core': true
+  '@parcel/watcher': true
+  core-js-pure: true
+  svelte-preprocess: true
