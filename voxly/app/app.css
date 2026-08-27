@@ -1,0 +1,87 @@
+@import 'tailwindcss';
+
+:root {
+  --voxly-primary: #6366f1;
+  --voxly-primary-hover: #4f46e5;
+  --voxly-background: #f8fafc;
+  --voxly-surface: #ffffff;
+  --voxly-text: #0f172a;
+  --voxly-muted: #64748b;
+  --voxly-border: #e2e8f0;
+}
+
+@theme {
+  --color-primary: #6366f1;
+  --color-primary-dark: #4f46e5;
+  --color-accent: #f43f5e;
+  --color-danger: #ef4444;
+  --color-success: #10b981;
+}
+
+/* Font Awesome definitions for NativeScript native icons */
+.fab {
+  font-family: 'Font Awesome 5 Brands', 'fa-brands-400';
+  font-weight: 400;
+}
+
+.fas {
+  font-family: 'Font Awesome 5 Free', 'fa-solid-900';
+  font-weight: 900;
+}
+
+.far {
+  font-family: 'Font Awesome 5 Free', 'fa-regular-400';
+  font-weight: 400;
+}
+
+/* Voxly Design System Utilities & Light/Dark Theme Adaptation */
+.page-bg {
+  background-color: #f8fafc;
+}
+
+.ns-dark .page-bg {
+  background-color: #0f172a;
+}
+
+.card-surface {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.ns-dark .card-surface {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.text-title {
+  color: #0f172a;
+}
+
+.ns-dark .text-title {
+  color: #f8fafc;
+}
+
+.text-subtitle {
+  color: #64748b;
+}
+
+.ns-dark .text-subtitle {
+  color: #94a3b8;
+}
+
+.text-muted {
+  color: #94a3b8;
+}
+
+.ns-dark .text-muted {
+  color: #64748b;
+}
+
+.btn-primary {
+  background-color: #6366f1;
+  color: #ffffff;
+}
+
+.btn-primary:highlighted {
+  background-color: #4f46e5;
+}
