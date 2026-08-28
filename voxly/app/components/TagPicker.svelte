@@ -1,21 +1,21 @@
 <gridLayout class="modal-backdrop" rows="*, auto">
   <!-- Tap backdrop to dismiss / skip -->
-  <stackLayout row="0" on:tap={handleSkip} />
+  <stackLayout row={0} on:tap={handleSkip} />
 
   <!-- Bottom Sheet Card Surface -->
   <gridLayout 
-    row="1" 
+    row={1} 
     class="p-6 rounded-t-3xl modal-content" 
     rows="auto, auto, auto, auto, auto, auto"
   >
     <!-- Header -->
-    <gridLayout row="0" columns="*, auto" class="mb-3">
-      <stackLayout col="0">
+    <gridLayout row={0} columns="*, auto" class="mb-3">
+      <stackLayout col={0}>
         <label text="Recording saved" class="font-bold text-title text-base" />
         <label text="How are you feeling?" class="mt-0.5 text-subtitle text-xs" />
       </stackLayout>
       <button 
-        col="1" 
+        col={1} 
         class="rounded-full w-8 h-8 text-center icon-btn"
         on:tap={handleSkip}
       >
@@ -26,7 +26,7 @@
     </gridLayout>
 
     <!-- Emotions Section -->
-    <flexboxLayout row="1" class="flex-wrap mb-4">
+    <flexboxLayout row={1} class="flex-wrap mb-4">
       {#each EMOTIONS as emotion}
         <button 
           text={capitalize(emotion)} 
@@ -37,8 +37,8 @@
     </flexboxLayout>
 
     <!-- Topics Section -->
-    <label row="2" text="Topic" class="mb-2 font-semibold text-title text-xs tracking-wide" />
-    <flexboxLayout row="3" class="flex-wrap mb-5">
+    <label row={2} text="Topic" class="mb-2 font-semibold text-title text-xs tracking-wide" />
+    <flexboxLayout row={3} class="flex-wrap mb-5">
       {#each TOPICS as topic}
         <button 
           text={capitalize(topic)} 
@@ -49,15 +49,15 @@
     </flexboxLayout>
 
     <!-- Actions: Save & Skip -->
-    <gridLayout row="4" columns="*, *" class="gap-3">
+    <gridLayout row={4} columns="*, *" class="gap-3">
       <button 
-        col="0" 
+        col={0} 
         text="Skip" 
         class="py-3 rounded-xl font-semibold text-subtitle text-xs text-center card-subtle"
         on:tap={handleSkip}
       />
       <button 
-        col="1" 
+        col={1} 
         text="Save" 
         class="shadow-md py-3 rounded-xl font-bold text-xs text-center btn-record-idle"
         on:tap={handleSave}
@@ -65,6 +65,7 @@
     </gridLayout>
   </gridLayout>
 </gridLayout>
+
 
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
