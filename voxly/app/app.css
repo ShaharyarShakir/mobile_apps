@@ -7,10 +7,10 @@
   --voxly-recording: #ef4444;
   --voxly-recording-glow: #fee2e2;
 
-  --voxly-bg-dark: #0f1117;
-  --voxly-surface-dark: #1a1d27;
-  --voxly-surface-subtle-dark: #222634;
-  --voxly-border-dark: #282d3d;
+  --voxly-bg-dark: #0b0d14;
+  --voxly-surface-dark: #151824;
+  --voxly-surface-subtle-dark: #1e2233;
+  --voxly-border-dark: #272d42;
 
   --voxly-bg-light: #f8fafc;
   --voxly-surface-light: #ffffff;
@@ -53,7 +53,7 @@ Page, Label, Button, TextField, TextView {
 
 /* Background */
 .page-bg {
-  background-color: #0f1117;
+  background-color: #0b0d14;
 }
 
 .ns-light .page-bg {
@@ -62,8 +62,8 @@ Page, Label, Button, TextField, TextView {
 
 /* Elevated Surfaces & Cards */
 .card-surface {
-  background-color: #1a1d27;
-  border-color: #282d3d;
+  background-color: #151824;
+  border-color: #272d42;
   border-width: 1;
 }
 
@@ -74,8 +74,8 @@ Page, Label, Button, TextField, TextView {
 }
 
 .card-subtle {
-  background-color: #222634;
-  border-color: #2e3447;
+  background-color: #1e2233;
+  border-color: #2c334d;
   border-width: 1;
 }
 
@@ -120,8 +120,8 @@ Page, Label, Button, TextField, TextView {
 
 /* Record Button & Glow Rings */
 .record-outer-ring {
-  background-color: #181b28;
-  border-color: #2a3148;
+  background-color: #161a29;
+  border-color: #2a3350;
   border-width: 2;
 }
 
@@ -132,8 +132,8 @@ Page, Label, Button, TextField, TextView {
 }
 
 .record-outer-ring-active {
-  background-color: #2a1417;
-  border-color: #5c1d24;
+  background-color: #2c1216;
+  border-color: #6d2028;
   border-width: 2;
 }
 
@@ -144,7 +144,7 @@ Page, Label, Button, TextField, TextView {
 }
 
 .record-inner-ring {
-  background-color: #24293e;
+  background-color: #20263c;
 }
 
 .ns-light .record-inner-ring {
@@ -152,7 +152,7 @@ Page, Label, Button, TextField, TextView {
 }
 
 .record-inner-ring-active {
-  background-color: #40181d;
+  background-color: #4a191f;
 }
 
 .ns-light .record-inner-ring-active {
@@ -179,9 +179,13 @@ Page, Label, Button, TextField, TextView {
 
 /* Control Buttons & Chips */
 .icon-btn {
-  background-color: #1a1d27;
-  border-color: #282d3d;
+  background-color: #181c2b;
+  border-color: #272d42;
   border-width: 1;
+}
+
+.icon-btn:highlighted {
+  background-color: #262d45;
 }
 
 .ns-light .icon-btn {
@@ -190,9 +194,13 @@ Page, Label, Button, TextField, TextView {
   border-width: 1;
 }
 
+.ns-light .icon-btn:highlighted {
+  background-color: #f1f5f9;
+}
+
 .status-pill {
-  background-color: #1a1d27;
-  border-color: #282d3d;
+  background-color: #181c2b;
+  border-color: #272d42;
   border-width: 1;
 }
 
@@ -203,8 +211,8 @@ Page, Label, Button, TextField, TextView {
 }
 
 .status-pill-active {
-  background-color: #2a1417;
-  border-color: #5c1d24;
+  background-color: #2c1216;
+  border-color: #6d2028;
   border-width: 1;
 }
 
@@ -215,15 +223,23 @@ Page, Label, Button, TextField, TextView {
 }
 
 .prompt-chip {
-  background-color: #222634;
-  border-color: #2f3549;
+  background-color: #1a1e2e;
+  border-color: #283049;
   border-width: 1;
+}
+
+.prompt-chip:highlighted {
+  background-color: #242a40;
 }
 
 .ns-light .prompt-chip {
   background-color: #f8fafc;
   border-color: #e2e8f0;
   border-width: 1;
+}
+
+.ns-light .prompt-chip:highlighted {
+  background-color: #f1f5f9;
 }
 
 /* Waveform Bars */
@@ -237,10 +253,15 @@ Page, Label, Button, TextField, TextView {
   border-radius: 4;
 }
 
+.waveform-bar-playing {
+  background-color: #38bdf8;
+  border-radius: 3;
+}
+
 /* Audio Player Component */
 .player-card {
-  background-color: #1a1d27;
-  border-color: #282d3d;
+  background-color: #151824;
+  border-color: #272d42;
   border-width: 1;
 }
 
@@ -261,7 +282,7 @@ Page, Label, Button, TextField, TextView {
 
 .player-btn-pause {
   background-color: #38bdf8;
-  color: #0f172a;
+  color: #0b0d14;
 }
 
 .player-btn-pause:highlighted {
@@ -270,7 +291,7 @@ Page, Label, Button, TextField, TextView {
 
 .player-slider {
   color: #6366f1;
-  background-color: #282d3d;
+  background-color: #272d42;
 }
 
 .ns-light .player-slider {
@@ -280,8 +301,8 @@ Page, Label, Button, TextField, TextView {
 
 /* Journal Entry Card */
 .journal-card {
-  background-color: #1a1d27;
-  border-color: #282d3d;
+  background-color: #151824;
+  border-color: #242a3e;
   border-width: 1;
 }
 
@@ -292,21 +313,106 @@ Page, Label, Button, TextField, TextView {
 }
 
 .journal-card-active {
-  background-color: #1f2333;
+  background-color: #191e2e;
   border-color: #6366f1;
-  border-width: 1;
+  border-width: 1.5;
 }
 
 .ns-light .journal-card-active {
   background-color: #f5f7ff;
   border-color: #818cf8;
+  border-width: 1.5;
+}
+
+/* Search Bar */
+.search-container {
+  background-color: #161a29;
+  border-color: #272d42;
+  border-width: 1;
+}
+
+.ns-light .search-container {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  border-width: 1;
+}
+
+.search-field {
+  color: #f8fafc;
+  placeholder-color: #64748b;
+  border-width: 0;
+}
+
+.ns-light .search-field {
+  color: #0f172a;
+  placeholder-color: #94a3b8;
+  border-width: 0;
+}
+
+/* Filter Bar Chips */
+.filter-chip-default {
+  background-color: #161a29;
+  border-color: #272d42;
+  border-width: 1;
+  color: #94a3b8;
+}
+
+.filter-chip-default:highlighted {
+  background-color: #22283e;
+}
+
+.ns-light .filter-chip-default {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  border-width: 1;
+  color: #64748b;
+}
+
+.filter-chip-active-emotion {
+  background-color: #3b204f;
+  border-color: #c084fc;
+  border-width: 1;
+  color: #f5d0fe;
+}
+
+.ns-light .filter-chip-active-emotion {
+  background-color: #f3e8ff;
+  border-color: #a855f7;
+  border-width: 1;
+  color: #6b21a8;
+}
+
+.filter-chip-active-topic {
+  background-color: #13334d;
+  border-color: #38bdf8;
+  border-width: 1;
+  color: #bae6fd;
+}
+
+.ns-light .filter-chip-active-topic {
+  background-color: #e0f2fe;
+  border-color: #0284c7;
+  border-width: 1;
+  color: #0369a1;
+}
+
+/* Mini Player Bar */
+.mini-player-bar {
+  background-color: #171b2b;
+  border-color: #313a57;
+  border-width: 1;
+}
+
+.ns-light .mini-player-bar {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
   border-width: 1;
 }
 
 /* Tag Pills */
 .tag-pill-emotion {
-  background-color: #2e2640;
-  color: #c084fc;
+  background-color: #2b1e38;
+  color: #d8b4fe;
 }
 
 .ns-light .tag-pill-emotion {
@@ -315,8 +421,8 @@ Page, Label, Button, TextField, TextView {
 }
 
 .tag-pill-topic {
-  background-color: #1e293b;
-  color: #38bdf8;
+  background-color: #16273c;
+  color: #7dd3fc;
 }
 
 .ns-light .tag-pill-topic {
@@ -326,12 +432,12 @@ Page, Label, Button, TextField, TextView {
 
 /* Tag Selector Modal / Sheet */
 .modal-backdrop {
-  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .modal-content {
-  background-color: #1a1d27;
-  border-color: #282d3d;
+  background-color: #151824;
+  border-color: #272d42;
   border-width: 1;
 }
 
@@ -342,8 +448,8 @@ Page, Label, Button, TextField, TextView {
 }
 
 .chip-tag {
-  background-color: #222634;
-  border-color: #2f3549;
+  background-color: #1d2235;
+  border-color: #2c344e;
   border-width: 1;
   color: #94a3b8;
 }
@@ -356,10 +462,10 @@ Page, Label, Button, TextField, TextView {
 }
 
 .chip-tag-selected-emotion {
-  background-color: #3b285a;
-  border-color: #a855f7;
+  background-color: #421e5c;
+  border-color: #c084fc;
   border-width: 1;
-  color: #e9d5ff;
+  color: #f5d0fe;
 }
 
 .ns-light .chip-tag-selected-emotion {
@@ -370,7 +476,7 @@ Page, Label, Button, TextField, TextView {
 }
 
 .chip-tag-selected-topic {
-  background-color: #17324d;
+  background-color: #153a5b;
   border-color: #38bdf8;
   border-width: 1;
   color: #bae6fd;
@@ -382,5 +488,6 @@ Page, Label, Button, TextField, TextView {
   border-width: 1;
   color: #0369a1;
 }
+
 
 
