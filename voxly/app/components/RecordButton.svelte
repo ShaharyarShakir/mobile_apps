@@ -73,12 +73,12 @@
         on:tap={handleStopRecording}
       >
         <label 
-          col="0" 
+          col={0} 
           text="●" 
           class="mr-2 text-red-500 text-xs vertical-middle" 
         />
         <label 
-          col="1" 
+          col={1} 
           text="Save Thought" 
           class="font-bold text-red-400 text-xs vertical-middle" 
         />
@@ -91,18 +91,19 @@
         on:tap={handleCancelRecording}
       >
         <label 
-          col="0" 
+          col={0} 
           text={ICONS.TRASH} 
           class="mr-1.5 text-subtitle text-xs fas vertical-middle" 
         />
         <label 
-          col="1" 
+          col={1} 
           text="Discard" 
           class="font-semibold text-subtitle text-xs vertical-middle" 
         />
       </gridLayout>
     </stackLayout>
   {/if}
+
 </stackLayout>
 
 <script lang="ts">
