@@ -3,85 +3,384 @@
 :root {
   --voxly-primary: #6366f1;
   --voxly-primary-hover: #4f46e5;
-  --voxly-background: #f8fafc;
-  --voxly-surface: #ffffff;
-  --voxly-text: #0f172a;
-  --voxly-muted: #64748b;
-  --voxly-border: #e2e8f0;
+  --voxly-accent: #38bdf8;
+  --voxly-recording: #ef4444;
+  --voxly-recording-glow: #fee2e2;
+
+  --voxly-bg-dark: #0f1117;
+  --voxly-surface-dark: #1a1d27;
+  --voxly-surface-subtle-dark: #222634;
+  --voxly-border-dark: #282d3d;
+
+  --voxly-bg-light: #f8fafc;
+  --voxly-surface-light: #ffffff;
+  --voxly-surface-subtle-light: #f1f5f9;
+  --voxly-border-light: #e2e8f0;
 }
 
 @theme {
   --color-primary: #6366f1;
   --color-primary-dark: #4f46e5;
-  --color-accent: #f43f5e;
+  --color-accent: #38bdf8;
   --color-danger: #ef4444;
   --color-success: #10b981;
 }
 
-/* Font Awesome definitions for NativeScript native icons */
-.fab {
-  font-family: 'Font Awesome 5 Brands', 'fa-brands-400';
-  font-weight: 400;
+/* Global Font Enforcement for clean, crisp mobile typography */
+Page, Label, Button, TextField, TextView {
+  font-family: 'Roboto', 'Segoe UI', -apple-system, 'Helvetica Neue', sans-serif;
 }
 
+/* Font Awesome definitions for NativeScript native icons */
 .fas {
-  font-family: 'Font Awesome 5 Free', 'fa-solid-900';
+  font-family: 'fa-solid-900', 'Font Awesome 5 Free';
   font-weight: 900;
 }
 
 .far {
-  font-family: 'Font Awesome 5 Free', 'fa-regular-400';
+  font-family: 'fa-regular-400', 'Font Awesome 5 Free';
   font-weight: 400;
 }
 
-/* Voxly Design System Utilities & Light/Dark Theme Adaptation */
+.fab {
+  font-family: 'fa-brands-400', 'Font Awesome 5 Brands';
+  font-weight: 400;
+}
+
+/* =========================================================
+   Voxly UI Theme & Surface Tokens
+   ========================================================= */
+
+/* Background */
 .page-bg {
+  background-color: #0f1117;
+}
+
+.ns-light .page-bg {
   background-color: #f8fafc;
 }
 
-.ns-dark .page-bg {
-  background-color: #0f172a;
+/* Elevated Surfaces & Cards */
+.card-surface {
+  background-color: #1a1d27;
+  border-color: #282d3d;
+  border-width: 1;
 }
 
-.card-surface {
+.ns-light .card-surface {
   background-color: #ffffff;
   border-color: #e2e8f0;
+  border-width: 1;
 }
 
-.ns-dark .card-surface {
-  background-color: #1e293b;
-  border-color: #334155;
+.card-subtle {
+  background-color: #222634;
+  border-color: #2e3447;
+  border-width: 1;
 }
 
+.ns-light .card-subtle {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  border-width: 1;
+}
+
+/* Typography Colors */
 .text-title {
-  color: #0f172a;
-}
-
-.ns-dark .text-title {
   color: #f8fafc;
 }
 
-.text-subtitle {
-  color: #64748b;
+.ns-light .text-title {
+  color: #0f172a;
 }
 
-.ns-dark .text-subtitle {
+.text-subtitle {
   color: #94a3b8;
+}
+
+.ns-light .text-subtitle {
+  color: #64748b;
 }
 
 .text-muted {
-  color: #94a3b8;
-}
-
-.ns-dark .text-muted {
   color: #64748b;
 }
 
-.btn-primary {
+.ns-light .text-muted {
+  color: #94a3b8;
+}
+
+.text-brand {
+  color: #818cf8;
+}
+
+.ns-light .text-brand {
+  color: #6366f1;
+}
+
+/* Record Button & Glow Rings */
+.record-outer-ring {
+  background-color: #181b28;
+  border-color: #2a3148;
+  border-width: 2;
+}
+
+.ns-light .record-outer-ring {
+  background-color: #eef2ff;
+  border-color: #c7d2fe;
+  border-width: 2;
+}
+
+.record-outer-ring-active {
+  background-color: #2a1417;
+  border-color: #5c1d24;
+  border-width: 2;
+}
+
+.ns-light .record-outer-ring-active {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  border-width: 2;
+}
+
+.record-inner-ring {
+  background-color: #24293e;
+}
+
+.ns-light .record-inner-ring {
+  background-color: #e0e7ff;
+}
+
+.record-inner-ring-active {
+  background-color: #40181d;
+}
+
+.ns-light .record-inner-ring-active {
+  background-color: #fecaca;
+}
+
+.btn-record-idle {
   background-color: #6366f1;
   color: #ffffff;
 }
 
-.btn-primary:highlighted {
+.btn-record-idle:highlighted {
   background-color: #4f46e5;
 }
+
+.btn-record-active {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.btn-record-active:highlighted {
+  background-color: #dc2626;
+}
+
+/* Control Buttons & Chips */
+.icon-btn {
+  background-color: #1a1d27;
+  border-color: #282d3d;
+  border-width: 1;
+}
+
+.ns-light .icon-btn {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  border-width: 1;
+}
+
+.status-pill {
+  background-color: #1a1d27;
+  border-color: #282d3d;
+  border-width: 1;
+}
+
+.ns-light .status-pill {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  border-width: 1;
+}
+
+.status-pill-active {
+  background-color: #2a1417;
+  border-color: #5c1d24;
+  border-width: 1;
+}
+
+.ns-light .status-pill-active {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  border-width: 1;
+}
+
+.prompt-chip {
+  background-color: #222634;
+  border-color: #2f3549;
+  border-width: 1;
+}
+
+.ns-light .prompt-chip {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  border-width: 1;
+}
+
+/* Waveform Bars */
+.waveform-bar {
+  background-color: #6366f1;
+  border-radius: 4;
+}
+
+.waveform-bar-active {
+  background-color: #ef4444;
+  border-radius: 4;
+}
+
+/* Audio Player Component */
+.player-card {
+  background-color: #1a1d27;
+  border-color: #282d3d;
+  border-width: 1;
+}
+
+.ns-light .player-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  border-width: 1;
+}
+
+.player-btn-play {
+  background-color: #6366f1;
+  color: #ffffff;
+}
+
+.player-btn-play:highlighted {
+  background-color: #4f46e5;
+}
+
+.player-btn-pause {
+  background-color: #38bdf8;
+  color: #0f172a;
+}
+
+.player-btn-pause:highlighted {
+  background-color: #0ea5e9;
+}
+
+.player-slider {
+  color: #6366f1;
+  background-color: #282d3d;
+}
+
+.ns-light .player-slider {
+  color: #6366f1;
+  background-color: #e2e8f0;
+}
+
+/* Journal Entry Card */
+.journal-card {
+  background-color: #1a1d27;
+  border-color: #282d3d;
+  border-width: 1;
+}
+
+.ns-light .journal-card {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  border-width: 1;
+}
+
+.journal-card-active {
+  background-color: #1f2333;
+  border-color: #6366f1;
+  border-width: 1;
+}
+
+.ns-light .journal-card-active {
+  background-color: #f5f7ff;
+  border-color: #818cf8;
+  border-width: 1;
+}
+
+/* Tag Pills */
+.tag-pill-emotion {
+  background-color: #2e2640;
+  color: #c084fc;
+}
+
+.ns-light .tag-pill-emotion {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+}
+
+.tag-pill-topic {
+  background-color: #1e293b;
+  color: #38bdf8;
+}
+
+.ns-light .tag-pill-topic {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+/* Tag Selector Modal / Sheet */
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.75);
+}
+
+.modal-content {
+  background-color: #1a1d27;
+  border-color: #282d3d;
+  border-width: 1;
+}
+
+.ns-light .modal-content {
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  border-width: 1;
+}
+
+.chip-tag {
+  background-color: #222634;
+  border-color: #2f3549;
+  border-width: 1;
+  color: #94a3b8;
+}
+
+.ns-light .chip-tag {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  border-width: 1;
+  color: #475569;
+}
+
+.chip-tag-selected-emotion {
+  background-color: #3b285a;
+  border-color: #a855f7;
+  border-width: 1;
+  color: #e9d5ff;
+}
+
+.ns-light .chip-tag-selected-emotion {
+  background-color: #f3e8ff;
+  border-color: #9333ea;
+  border-width: 1;
+  color: #6b21a8;
+}
+
+.chip-tag-selected-topic {
+  background-color: #17324d;
+  border-color: #38bdf8;
+  border-width: 1;
+  color: #bae6fd;
+}
+
+.ns-light .chip-tag-selected-topic {
+  background-color: #e0f2fe;
+  border-color: #0284c7;
+  border-width: 1;
+  color: #0369a1;
+}
+
+
