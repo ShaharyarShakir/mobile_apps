@@ -1,70 +1,101 @@
 <stackLayout 
-  class="journal-card {$isActiveCard ? 'journal-card-active' : ''} rounded-3xl p-4 mb-3.5 shadow-sm"
+  class="journal-card {isActiveCard ? 'journal-card-active' : ''} rounded-3xl p-4 mb-3.5 shadow-sm"
 >
   <!-- Top Row: Play/Pause Icon, Title & Time, and More Actions Button (⋯) -->
   <gridLayout columns="auto, *, auto" class="items-center">
     <!-- Play / Pause Action Button -->
     <button 
-      col="0" 
-      class="w-11 h-11 rounded-full text-center mr-3 font-bold {$isThisCardPlaying ? 'player-btn-pause' : 'player-btn-play'} shadow-xs"
+      col={0} 
+      class="w-11 h-11 rounded-full text-center mr-3 font-bold {isThisCardPlaying ? 'player-btn-pause' : 'player-btn-play'} shadow-xs"
       on:tap={handleTogglePlay}
       isEnabled={!isProcessing}
     >
       <formattedString>
         <span 
-          text={$isThisCardPlaying ? ICONS.PAUSE : ICONS.PLAY} 
+          text={isThisCardPlaying ? ICONS.PAUSE : ICONS.PLAY} 
           class="text-sm fas" 
         />
       </formattedString>
     </button>
 
     <!-- Entry Time & Duration (or Active Progress Indicator) -->
-    <stackLayout col="1" class="justify-center" on:tap={handleTogglePlay}>
-      <label 
-        text={formatJournalTime(entry.createdAt)} 
-        class="font-bold text-title text-sm" 
-      />
+    <stackLayout col={1} class="justify-center" on:tap={handleTogglePlay}>
+      <gridLayout columns="*, auto" class="items-center">
+        <label 
+          col={0}
+          text={formatJournalTime(entry.createdAt)} 
+          class="font-bold text-title text-sm" 
+        />
+        {#if isThisCardPlaying}
+          <Waveform active={true} compact={true} variant="play" />
+        {/if}
+      </gridLayout>
       <label 
         text={formatDuration(entryDurationMs)} 
-        class="font-mono text-muted text-xs mt-0.5" 
+        class="mt-0.5 font-mono text-muted text-xs" 
       />
     </stackLayout>
 
     <!-- More Actions (⋯) -->
     <button 
-      col="2" 
-      class="w-9 h-9 rounded-full icon-btn text-center"
+      col={2} 
+      class="rounded-full w-9 h-9 text-center icon-btn"
       on:tap={handleMoreActions}
     >
       <formattedString>
-        <span text={ICONS.ELLIPSIS} class="text-xs fas text-subtitle" />
+        <span text={ICONS.ELLIPSIS} class="text-subtitle text-xs fas" />
       </formattedString>
     </button>
   </gridLayout>
 
   <!-- Interactive Slider & Live Timestamp Progress (shown when this card is active) -->
-  {#if $isActiveCard}
-    <gridLayout columns="auto, *, auto" class="items-center mt-3 pt-2 px-1 border-t border-gray-800/20">
+  {#if isActiveCard}
+    <gridLayout columns="auto, *, auto" class="items-center mt-3 px-1 pt-2 border-gray-800/20 border-t">
       <label 
-        col="0" 
+        col={0} 
         text={formatDuration(currentPositionDisplay)} 
-        class="text-xs font-mono text-subtitle w-11 text-left" 
+        class="w-11 font-mono text-subtitle text-xs text-left" 
       />
       <slider 
-        col="1" 
-        class="player-slider mx-2"
+        col={1} 
+        class="mx-2 player-slider"
         value={sliderPosition} 
         minValue={0} 
         maxValue={entryDurationMs > 0 ? entryDurationMs : 1000}
         on:valueChange={handleSeek}
       />
       <label 
-        col="2" 
+        col={2} 
         text={formatDuration(entryDurationMs)} 
-        class="text-xs font-mono text-subtitle w-11 text-right" 
+        class="w-11 font-mono text-subtitle text-xs text-right" 
+      />
+    </gridLayout>
+
+    <!-- Quick Seek & Speed Control Bar -->
+    <gridLayout columns="auto, *, auto" class="items-center mt-2 px-1">
+      <stackLayout col={0} orientation="horizontal" class="items-center">
+        <button 
+          class="mr-1.5 px-2.5 py-1 rounded-full font-semibold text-3xs icon-btn"
+          text="-10s"
+          on:tap={() => handleSkip(-10)}
+        />
+        <button 
+          class="mr-1.5 px-2.5 py-1 rounded-full font-semibold text-3xs icon-btn"
+          text="+10s"
+          on:tap={() => handleSkip(10)}
+        />
+      </stackLayout>
+
+      <button 
+        col={2} 
+        class="px-3 py-1 rounded-full font-bold text-3xs text-brand icon-btn"
+        text="{$playbackSpeed}x"
+        on:tap={handleSpeedCycle}
       />
     </gridLayout>
   {/if}
+
+
 
   <!-- Bottom Row: Emotion & Topic Badges -->
   {#if hasTags}
@@ -87,7 +118,9 @@
   import { 
     currentAudioUri, 
     isPlaying, 
-    playbackPosition 
+    playbackPosition,
+    playbackSpeed,
+    cyclePlaybackSpeed
   } from '../stores/player';
   import { activePlayingEntryId, deleteJournalEntry } from '../stores/journal';
   import { player } from '../services/audio/player';
@@ -96,6 +129,7 @@
   import { ICONS } from '../utils/icons';
   import { confirmDeleteEntry, showMissingAudioFileDialog, showPlaybackErrorAlert } from '../utils/dialogs';
   import TagPill from './journal/TagPill.svelte';
+  import Waveform from './audio/Waveform.svelte';
 
   export let entry: JournalEntry;
 
@@ -107,12 +141,12 @@
 
   $: entryDurationMs = entry.duration > 1000 ? entry.duration : entry.duration * 1000;
   $: isActiveCard = $activePlayingEntryId === entry.id;
-  $: isThisCardPlaying = $isActiveCard && $isPlaying;
+  $: isThisCardPlaying = isActiveCard && $isPlaying;
   $: hasTags = Boolean(entry.emotion || entry.topic);
 
   $: currentPositionDisplay = isSeeking ? sliderPosition : $playbackPosition;
 
-  $: if (!isSeeking && $isActiveCard) {
+  $: if (!isSeeking && isActiveCard) {
     sliderPosition = $playbackPosition;
   }
 
@@ -149,7 +183,7 @@
   }
 
   function handleSeek(args: any) {
-    if (!$isActiveCard) return;
+    if (!isActiveCard) return;
     const newPos = Math.round(args.value);
     sliderPosition = newPos;
     isSeeking = true;
@@ -164,6 +198,24 @@
         isSeeking = false;
       }
     }, 50);
+  }
+
+  async function handleSkip(seconds: number) {
+    if (!isActiveCard) return;
+    try {
+      await player.skip(seconds);
+    } catch (e) {
+      console.warn('[JournalEntryCard] Skip error:', e);
+    }
+  }
+
+  async function handleSpeedCycle() {
+    const newSpeed = cyclePlaybackSpeed();
+    try {
+      await player.setSpeed(newSpeed);
+    } catch (e) {
+      console.warn('[JournalEntryCard] Set speed error:', e);
+    }
   }
 
   async function handleMoreActions() {
@@ -187,3 +239,5 @@
     }
   }
 </script>
+
+
