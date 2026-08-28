@@ -1,25 +1,36 @@
-<page class="page-bg" actionBarHidden="true">
+<page class="page-bg" actionBarHidden={true}>
   <gridLayout rows="*" class="page-bg">
-    <!-- Main Scrollable Content -->
-    <gridLayout rows="auto, *" row="0">
-      <!-- App Header -->
-      <AppHeader row="0" />
+    <!-- Main Content Container with Docked MiniPlayer -->
+    <gridLayout rows="auto, *, auto" row={0}>
+      <!-- Fixed Top Controls: App Header, Search Bar, Filter Bar -->
+      <stackLayout row={0}>
+        <AppHeader />
+        <SearchBar />
+        <FilterBar />
+      </stackLayout>
 
       <!-- Scrollable Feed -->
-      <scrollView row="1">
-        <stackLayout class="pb-12">
+      <scrollView row={1}>
+        <stackLayout class="pb-16">
           <!-- Hero Recording Experience -->
           <RecordButton on:entryCreated={handleEntryCreated} />
 
           <!-- Modular Journal Feed -->
           <JournalFeed 
-            entries={$journalEntries} 
+            entries={$filteredJournalEntries} 
             isLoading={$isLoadingJournal} 
             on:editTags={handleOpenTagModal} 
           />
         </stackLayout>
       </scrollView>
+
+      <!-- Sticky Bottom MiniPlayer -->
+      <stackLayout row={2}>
+        <MiniPlayer />
+      </stackLayout>
     </gridLayout>
+
+
 
     <!-- Bottom-Sheet Tag Picker Modal -->
     {#if editingEntry}
@@ -36,10 +47,13 @@
   import { onMount, onDestroy } from 'svelte';
   import { Application, isAndroid, AndroidApplication } from '@nativescript/core';
   import AppHeader from '../components/AppHeader.svelte';
+  import SearchBar from '../components/journal/SearchBar.svelte';
+  import FilterBar from '../components/journal/FilterBar.svelte';
   import RecordButton from '../components/RecordButton.svelte';
   import JournalFeed from '../components/journal/JournalFeed.svelte';
+  import MiniPlayer from '../components/audio/MiniPlayer.svelte';
   import TagPicker from '../components/TagPicker.svelte';
-  import { journalEntries, isLoadingJournal, loadJournal } from '../stores/journal';
+  import { filteredJournalEntries, isLoadingJournal, loadJournal } from '../stores/journal';
   import { isRecording, resetRecordingState } from '../stores/recording';
   import { database } from '../services/database';
   import { recorder } from '../services/audio';
@@ -103,3 +117,4 @@
     editingEntry = null;
   }
 </script>
+

@@ -1,4 +1,5 @@
-<scrollView orientation="horizontal" scrollBarIndicatorVisible="false" class="my-1.5 px-4">
+<scrollView orientation="horizontal" scrollBarIndicatorVisible={false} class="my-1.5 px-4">
+
   <stackLayout orientation="horizontal" class="items-center py-1">
     <!-- "All" Reset Chip -->
     <button 
