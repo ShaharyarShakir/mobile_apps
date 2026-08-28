@@ -2,15 +2,15 @@
   {#if !$isRecording}
     <!-- ==================== IDLE STATE ==================== -->
     <gridLayout 
-      class="w-32 h-32 rounded-full justify-center items-center record-outer-ring" 
+      class="justify-center items-center rounded-full record-outer-ring w-32 h-32" 
       horizontalAlignment="center"
     >
       <gridLayout 
-        class="w-24 h-24 rounded-full justify-center items-center record-inner-ring" 
+        class="justify-center items-center rounded-full record-inner-ring w-24 h-24" 
         horizontalAlignment="center"
       >
         <button 
-          class="w-18 h-18 rounded-full font-bold text-center btn-record-idle shadow-lg"
+          class="shadow-lg rounded-full w-18 h-18 font-bold text-center btn-record-idle"
           on:tap={handleStartRecording}
           isEnabled={!isProcessing}
         >
@@ -27,7 +27,7 @@
     <!-- Subtitle Prompt -->
     <label 
       text="Record a thought" 
-      class="text-xs font-semibold text-subtitle mt-3 tracking-wide" 
+      class="mt-3 font-semibold text-subtitle text-xs tracking-wide" 
     />
   {:else}
     <!-- ==================== RECORDING STATE ==================== -->
@@ -36,15 +36,15 @@
 
     <!-- Pulse Glow Record Button -->
     <gridLayout 
-      class="w-36 h-36 rounded-full justify-center items-center record-outer-ring-active" 
+      class="justify-center items-center rounded-full record-outer-ring-active w-36 h-36" 
       horizontalAlignment="center"
     >
       <gridLayout 
-        class="w-28 h-28 rounded-full justify-center items-center record-inner-ring-active" 
+        class="justify-center items-center rounded-full record-inner-ring-active w-28 h-28" 
         horizontalAlignment="center"
       >
         <button 
-          class="w-20 h-20 rounded-full font-bold text-center btn-record-active shadow-xl"
+          class="shadow-xl rounded-full w-20 h-20 font-bold text-center btn-record-active"
           on:tap={handleStopRecording}
           isEnabled={!isProcessing}
         >
@@ -61,26 +61,47 @@
     <!-- Prominent Recording Duration Timer -->
     <label 
       text={formatRecordingTime($recordingDuration)} 
-      class="text-2xl font-mono font-extrabold text-title mt-2" 
+      class="mt-2 font-mono font-extrabold text-title text-2xl" 
     />
 
-    <!-- Dedicated Stop Action Button / Pill -->
-    <gridLayout 
-      columns="auto, auto" 
-      class="status-pill-active rounded-full px-5 py-2 mt-2 items-center"
-      on:tap={handleStopRecording}
-    >
-      <label 
-        col="0" 
-        text="●" 
-        class="text-red-500 text-xs mr-2 vertical-middle" 
-      />
-      <label 
-        col="1" 
-        text="Tap to Stop" 
-        class="text-xs font-bold text-red-400 vertical-middle" 
-      />
-    </gridLayout>
+    <!-- Stop & Cancel Action Buttons -->
+    <stackLayout orientation="horizontal" class="items-center mt-2.5">
+      <!-- Stop Button Pill -->
+      <gridLayout 
+        columns="auto, auto" 
+        class="items-center mr-2 px-5 py-2 rounded-full status-pill-active"
+        on:tap={handleStopRecording}
+      >
+        <label 
+          col="0" 
+          text="●" 
+          class="mr-2 text-red-500 text-xs vertical-middle" 
+        />
+        <label 
+          col="1" 
+          text="Save Thought" 
+          class="font-bold text-red-400 text-xs vertical-middle" 
+        />
+      </gridLayout>
+
+      <!-- Discard / Cancel Button Pill -->
+      <gridLayout 
+        columns="auto, auto" 
+        class="items-center px-4 py-2 rounded-full status-pill"
+        on:tap={handleCancelRecording}
+      >
+        <label 
+          col="0" 
+          text={ICONS.TRASH} 
+          class="mr-1.5 text-subtitle text-xs fas vertical-middle" 
+        />
+        <label 
+          col="1" 
+          text="Discard" 
+          class="font-semibold text-subtitle text-xs vertical-middle" 
+        />
+      </gridLayout>
+    </stackLayout>
   {/if}
 </stackLayout>
 
@@ -99,7 +120,7 @@
   import { recorder } from '../services/audio';
   import { triggerRecordStartHaptic, triggerRecordStopHaptic } from '../utils/haptics';
   import { ICONS } from '../utils/icons';
-  import { showPermissionDeniedDialog, showRecordingErrorAlert, showSaveErrorAlert } from '../utils/dialogs';
+  import { showPermissionDeniedDialog, showRecordingErrorAlert, showSaveErrorAlert, confirmDiscardRecording } from '../utils/dialogs';
   import Waveform from './audio/Waveform.svelte';
 
   const dispatch = createEventDispatcher();
@@ -168,7 +189,28 @@
     }
   }
 
+  async function handleCancelRecording() {
+    if (isProcessing) return;
+    isProcessing = true;
+
+    try {
+      const confirmed = await confirmDiscardRecording();
+      if (confirmed) {
+        await recorder.cancel();
+        resetRecordingState();
+        triggerRecordStopHaptic();
+        console.log('[RecordButton] Recording discarded by user.');
+      }
+    } catch (err) {
+      console.error('[RecordButton] Error canceling recording:', err);
+      resetRecordingState();
+    } finally {
+      isProcessing = false;
+    }
+  }
+
   onDestroy(() => {
     stopDurationTimer();
   });
 </script>
+

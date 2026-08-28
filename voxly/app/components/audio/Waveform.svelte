@@ -1,51 +1,31 @@
-<stackLayout orientation="horizontal" class="justify-center items-end mb-5 h-14">
-  {#each barHeights as height, i}
+<stackLayout 
+  orientation="horizontal" 
+  class="justify-center items-center {compact ? 'h-6' : 'h-12 mb-3'}"
+>
+  {#each heights as height, i}
     <stackLayout 
-      class="w-1.5 mx-1 rounded-full {active ? 'waveform-bar-active' : 'waveform-bar'}"
-      style="height: {active ? dynamicHeights[i] : height}px; opacity: {active ? '1' : '0.45'};"
+      class="rounded-full mx-1 {active ? (variant === 'record' ? 'waveform-bar-active' : 'waveform-bar-playing') : 'waveform-bar'}"
+      style="width: {compact ? 3 : 5}; height: {height}; opacity: {active ? 1 : 0.35};"
     />
   {/each}
+
 </stackLayout>
 
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { audioLevels } from '../../stores/recording';
 
   export let active: boolean = false;
+  export let compact: boolean = false;
+  export let variant: 'record' | 'play' = 'record';
 
-  const barHeights = [12, 22, 36, 48, 38, 26, 14];
-  let dynamicHeights = [18, 38, 52, 42, 54, 30, 20];
-  let animationInterval: any = null;
+  const defaultHeroHeights = [14, 26, 42, 54, 44, 28, 16];
+  const defaultCompactHeights = [6, 12, 18, 22, 16, 10, 6];
 
-  $: if (active) {
-    startAnimation();
-  } else {
-    stopAnimation();
-  }
-
-  function startAnimation() {
-    stopAnimation();
-    animationInterval = setInterval(() => {
-      dynamicHeights = [
-        12 + Math.floor(Math.random() * 36),
-        20 + Math.floor(Math.random() * 32),
-        30 + Math.floor(Math.random() * 26),
-        24 + Math.floor(Math.random() * 32),
-        32 + Math.floor(Math.random() * 24),
-        18 + Math.floor(Math.random() * 34),
-        12 + Math.floor(Math.random() * 30),
-      ];
-    }, 180);
-  }
-
-  function stopAnimation() {
-    if (animationInterval) {
-      clearInterval(animationInterval);
-      animationInterval = null;
-    }
-  }
-
-  onDestroy(() => {
-    stopAnimation();
-  });
+  $: heights = active 
+    ? (compact 
+        ? $audioLevels.map((h) => Math.max(4, Math.round(h * 0.4))) 
+        : $audioLevels)
+    : (compact ? defaultCompactHeights : defaultHeroHeights);
 </script>
+
 
