@@ -18,7 +18,7 @@
     "@nativescript-community/svelte-native-preprocessor": "^1.0.1",
     "@nativescript/android": "^9.0.5",
     "@nativescript/tailwind": "^4.0.9",
-    "@nativescript/types": "~9.0.0",
+    "@nativescript/types": "~9.1.1",
     "@nativescript/webpack": "~5.0.28",
     "svelte": "~4.2.20",
     "svelte-loader": "^3.2.4",
