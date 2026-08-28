@@ -5,9 +5,18 @@
       <activityIndicator busy={true} class="mb-3 text-brand" />
       <label text="Loading your journal..." class="font-medium text-subtitle text-xs text-center" />
     </gridLayout>
-  <!-- Empty State -->
+  <!-- Empty / Filter State -->
   {:else if entries.length === 0}
-    <EmptyState />
+    {#if isFiltered}
+      <gridLayout class="justify-center items-center my-6 p-8 rounded-3xl card-surface" rows="auto, auto, auto, auto">
+        <label row="0" text={ICONS.SEARCH} class="mb-3 text-subtitle text-2xl text-center fas" />
+        <label row="1" text="No matching thoughts" class="font-bold text-title text-base text-center" />
+        <label row="2" text="Try changing your search keywords or filter pills." class="mt-1 mb-4 px-4 font-normal text-subtitle text-xs text-center" textWrap="true" />
+        <button row="3" text="Clear Filters" class="filter-chip-active-topic px-5 py-2 rounded-full font-bold text-xs" on:tap={clearAllFilters} />
+      </gridLayout>
+    {:else}
+      <EmptyState />
+    {/if}
   <!-- Grouped Journal Feed -->
   {:else}
     <!-- Note Stats Header -->
@@ -42,7 +51,14 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import type { JournalEntry } from '../../models/journal';
+  import { 
+    searchQuery, 
+    selectedEmotionFilter, 
+    selectedTopicFilter 
+  } from '../../stores/journal';
   import { groupEntriesByDate } from '../../utils/date';
+  import { ICONS } from '../../utils/icons';
+  import { triggerTagSelectHaptic } from '../../utils/haptics';
   import JournalEntryCard from '../JournalEntryCard.svelte';
   import EmptyState from '../EmptyState.svelte';
 
@@ -51,10 +67,19 @@
 
   const dispatch = createEventDispatcher();
 
+  $: isFiltered = Boolean($searchQuery || $selectedEmotionFilter || $selectedTopicFilter);
   $: groupedEntries = groupEntriesByDate(entries);
 
   function handleEditTags(entry: JournalEntry) {
     dispatch('editTags', { entry });
   }
+
+  function clearAllFilters() {
+    triggerTagSelectHaptic();
+    searchQuery.set('');
+    selectedEmotionFilter.set(null);
+    selectedTopicFilter.set(null);
+  }
 </script>
+
 

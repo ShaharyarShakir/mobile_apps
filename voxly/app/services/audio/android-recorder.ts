@@ -1,6 +1,6 @@
-import { Utils, Application } from '@nativescript/core';
+import { Utils, Application, File } from '@nativescript/core';
 import { AudioDriver } from './types';
-import { deleteRecordingFile } from './storage';
+import { deleteRecordingFile, uriToFilePath } from './storage';
 
 export class AndroidAudioDriver implements AudioDriver {
   private recorder: any = null; // android.media.MediaRecorder
@@ -18,10 +18,22 @@ export class AndroidAudioDriver implements AudioDriver {
     }
 
     try {
+      const cleanPath = uriToFilePath(outputPath);
       const context = Utils.android.getApplicationContext() || Application.android?.context;
 
       if (typeof android === 'undefined') {
         throw new Error('Android native environment not available.');
+      }
+
+      // Ensure directory exists on physical disk before recorder writes
+      try {
+        const javaFile = new java.io.File(cleanPath);
+        const parent = javaFile.getParentFile();
+        if (parent != null && !parent.exists()) {
+          parent.mkdirs();
+        }
+      } catch (dirErr) {
+        console.warn('[AndroidAudioDriver] Directory creation check note:', dirErr);
       }
 
       // Initialize MediaRecorder according to Android API level
@@ -31,7 +43,7 @@ export class AndroidAudioDriver implements AudioDriver {
         this.recorder = new android.media.MediaRecorder();
       }
 
-      this.currentFilePath = outputPath;
+      this.currentFilePath = cleanPath;
 
       // Configure MediaRecorder for AAC / MPEG-4 audio recording
       this.recorder.setAudioSource(android.media.MediaRecorder.AudioSource.MIC);
@@ -39,7 +51,7 @@ export class AndroidAudioDriver implements AudioDriver {
       this.recorder.setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC);
       this.recorder.setAudioEncodingBitRate(128000);
       this.recorder.setAudioSamplingRate(44100);
-      this.recorder.setOutputFile(outputPath);
+      this.recorder.setOutputFile(cleanPath);
 
       this.recorder.prepare();
       this.recorder.start();
@@ -61,7 +73,12 @@ export class AndroidAudioDriver implements AudioDriver {
     const elapsedSeconds = Math.max(1, Math.round((Date.now() - this.recordingStartTime) / 1000));
 
     try {
-      this.recorder.stop();
+      try {
+        this.recorder.stop();
+      } catch (stopErr) {
+        console.warn('[AndroidAudioDriver] Note on recorder.stop():', stopErr);
+      }
+
       this.recorder.reset();
       this.recorder.release();
       this.recorder = null;
