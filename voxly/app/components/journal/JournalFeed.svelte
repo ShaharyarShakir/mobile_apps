@@ -9,10 +9,11 @@
   {:else if entries.length === 0}
     {#if isFiltered}
       <gridLayout class="justify-center items-center my-6 p-8 rounded-3xl card-surface" rows="auto, auto, auto, auto">
-        <label row="0" text={ICONS.SEARCH} class="mb-3 text-subtitle text-2xl text-center fas" />
-        <label row="1" text="No matching thoughts" class="font-bold text-title text-base text-center" />
-        <label row="2" text="Try changing your search keywords or filter pills." class="mt-1 mb-4 px-4 font-normal text-subtitle text-xs text-center" textWrap="true" />
-        <button row="3" text="Clear Filters" class="filter-chip-active-topic px-5 py-2 rounded-full font-bold text-xs" on:tap={clearAllFilters} />
+        <label row={0} text={ICONS.SEARCH} class="mb-3 text-subtitle text-2xl text-center fas" />
+        <label row={1} text="No matching thoughts" class="font-bold text-title text-base text-center" />
+        <label row={2} text="Try changing your search keywords or filter pills." class="mt-1 mb-4 px-4 font-normal text-subtitle text-xs text-center" textWrap={true} />
+
+        <button row={3} text="Clear Filters" class="filter-chip-active-topic px-5 py-2 rounded-full font-bold text-xs" on:tap={clearAllFilters} />
       </gridLayout>
     {:else}
       <EmptyState />
@@ -22,16 +23,17 @@
     <!-- Note Stats Header -->
     <gridLayout columns="*, auto" class="mb-2 px-1">
       <label 
-        col="0" 
+        col={0} 
         text="Your Voice Notes" 
         class="font-bold text-title text-sm tracking-wide" 
       />
       <label 
-        col="1" 
+        col={1} 
         text={`${entries.length} ${entries.length === 1 ? 'thought' : 'thoughts'}`} 
         class="font-medium text-muted text-xs" 
       />
     </gridLayout>
+
 
     {#each groupedEntries as group}
       <label 

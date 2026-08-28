@@ -5,7 +5,7 @@
   >
     <!-- Play / Pause Toggle Button -->
     <button 
-      col="0" 
+      col={0} 
       class="w-10 h-10 rounded-full font-bold text-center mr-2.5 {$isPlaying ? 'player-btn-pause' : 'player-btn-play'} shadow-xs"
       on:tap={handleTogglePlay}
     >
@@ -15,22 +15,21 @@
     </button>
 
     <!-- Track Info & Dynamic Progress -->
-    <stackLayout col="1" class="justify-center">
+    <stackLayout col={1} class="justify-center">
       <label text={activeEntryTitle} class="font-bold text-title text-xs" />
       <gridLayout columns="auto, auto" class="items-center mt-0.5">
         <label 
-          col="0" 
+          col={0} 
           text="{formatDuration($playbackPosition)} / {formatDuration(effectiveDuration)}" 
           class="mr-2 font-mono text-3xs text-muted" 
         />
         <!-- Mini Dancing Soundwave Dots -->
         {#if $isPlaying}
-          <stackLayout col="1" orientation="horizontal" class="items-end h-2.5">
+          <stackLayout col={1} orientation="horizontal" class="items-end h-2.5">
             <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" height="6" />
             <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" height="10" />
             <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" height="7" />
             <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" height="9" />
-
           </stackLayout>
         {/if}
       </gridLayout>
@@ -38,7 +37,7 @@
 
     <!-- Speed Toggle Button -->
     <button 
-      col="2" 
+      col={2} 
       class="mr-1 px-2 py-1 rounded-full font-bold text-3xs text-brand icon-btn"
       text="{$playbackSpeed}x"
       on:tap={handleSpeedCycle}
@@ -46,7 +45,7 @@
 
     <!-- Skip 10s Forward Button -->
     <button 
-      col="3" 
+      col={3} 
       class="mr-1 rounded-full w-8 h-8 text-center icon-btn"
       on:tap={handleSkipForward}
     >
@@ -57,7 +56,7 @@
 
     <!-- Dismiss / Close Player -->
     <button 
-      col="4" 
+      col={4} 
       class="rounded-full w-8 h-8 text-center icon-btn"
       on:tap={handleClose}
     >
@@ -66,6 +65,7 @@
       </formattedString>
     </button>
   </gridLayout>
+
 {/if}
 
 <script lang="ts">
