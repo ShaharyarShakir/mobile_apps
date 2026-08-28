@@ -4,15 +4,16 @@
   horizontalAlignment="center"
 >
   <label 
-    col="0" 
+    col={0} 
     text="●" 
     class="text-xs mr-1.5 vertical-middle {active ? 'text-red-500 font-bold' : 'text-emerald-500'}" 
   />
   <label 
-    col="1" 
+    col={1} 
     text={active ? `Recording ${formatDuration(duration)}` : 'Tap to start recording'} 
     class="text-xs font-semibold vertical-middle {active ? 'text-red-400' : 'text-subtitle'}" 
   />
+
 </gridLayout>
 
 <script lang="ts">

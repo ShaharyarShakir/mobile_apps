@@ -3,21 +3,21 @@
   rows="auto, auto, auto"
 >
   <!-- Optional Title / Status Header -->
-  <gridLayout row="0" columns="*, auto" class="mb-2 px-1">
+  <gridLayout row={0} columns="*, auto" class="mb-2 px-1">
     <label 
-      col="0" 
+      col={0} 
       text={title || 'Voice Note'} 
       class="font-semibold text-title text-sm vertical-middle" 
     />
     <label 
-      col="1" 
+      col={1} 
       text={$isPlaying ? 'Playing' : 'Ready'} 
       class="text-xs font-medium {$isPlaying ? 'text-brand' : 'text-muted'} vertical-middle" 
     />
   </gridLayout>
 
   <!-- Center Play / Pause Action Button -->
-  <flexboxLayout row="1" class="justify-center items-center py-2" horizontalAlignment="center">
+  <flexboxLayout row={1} class="justify-center items-center py-2" horizontalAlignment="center">
     <button 
       class="w-16 h-16 rounded-full font-bold text-center {$isPlaying ? 'player-btn-pause' : 'player-btn-play'} shadow-md"
       on:tap={togglePlayback}
@@ -33,17 +33,17 @@
   </flexboxLayout>
 
   <!-- Progress Bar & Duration Indicators -->
-  <gridLayout row="2" columns="auto, *, auto" class="items-center mt-3 px-1">
+  <gridLayout row={2} columns="auto, *, auto" class="items-center mt-3 px-1">
     <!-- Current Timestamp -->
     <label 
-      col="0" 
+      col={0} 
       text={formatDuration(currentPositionDisplay)} 
       class="w-12 font-mono text-subtitle text-xs text-left vertical-middle" 
     />
 
     <!-- Interactive Native Seek Slider -->
     <slider 
-      col="1" 
+      col={1} 
       class="mx-2 player-slider"
       value={sliderPosition} 
       minValue={0} 
@@ -54,12 +54,13 @@
 
     <!-- Total Duration -->
     <label 
-      col="2" 
+      col={2} 
       text={formatDuration(totalDurationDisplay)} 
       class="w-12 font-mono text-subtitle text-xs text-right vertical-middle" 
     />
   </gridLayout>
 </gridLayout>
+
 
 <script lang="ts">
   import { onDestroy } from 'svelte';
