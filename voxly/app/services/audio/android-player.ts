@@ -172,6 +172,21 @@ export class AndroidAudioPlayerDriver implements AudioPlayerDriver {
     }
   }
 
+  public async setSpeed(speed: number): Promise<void> {
+    if (!this.player || !this._isLoaded) return;
+
+    try {
+      if (typeof android !== 'undefined' && android.os.Build.VERSION.SDK_INT >= 23) {
+        const params = this.player.getPlaybackParams();
+        params.setSpeed(speed);
+        this.player.setPlaybackParams(params);
+      }
+    } catch (err) {
+      console.warn('[AndroidAudioPlayer] Error setting playback speed:', err);
+    }
+  }
+
+
   public async unload(): Promise<void> {
     this.stopProgressTimer();
     this._isPlaying = false;

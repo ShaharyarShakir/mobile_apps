@@ -26,10 +26,11 @@
         <!-- Mini Dancing Soundwave Dots -->
         {#if $isPlaying}
           <stackLayout col="1" orientation="horizontal" class="items-end h-2.5">
-            <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" style="height: 6px;" />
-            <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" style="height: 10px;" />
-            <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" style="height: 7px;" />
-            <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" style="height: 9px;" />
+            <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" height="6" />
+            <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" height="10" />
+            <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" height="7" />
+            <stackLayout class="bg-sky-400 mx-0.5 rounded-full w-1" height="9" />
+
           </stackLayout>
         {/if}
       </gridLayout>
