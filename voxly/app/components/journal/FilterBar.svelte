@@ -1,12 +1,12 @@
-<scrollView orientation="horizontal" scrollBarIndicatorVisible={false} class="my-1.5 px-4">
-
+<scrollView orientation="horizontal" scrollBarIndicatorVisible={false} class="my-1.5 px-5">
   <stackLayout orientation="horizontal" class="items-center py-1">
     <!-- "All" Reset Chip -->
     <button 
-      text="All Thoughts ({$journalStats.totalCount})" 
-      class="rounded-full px-3.5 py-1.5 mr-2 text-xs font-semibold {!$selectedEmotionFilter && !$selectedTopicFilter ? 'filter-chip-active-topic font-bold' : 'filter-chip-default'}"
+      text="All ({$journalStats.totalCount})" 
+      class="rounded-full px-4 py-2 mr-2 text-xs font-semibold {!$selectedEmotionFilter && !$selectedTopicFilter ? 'filter-chip-active-topic font-bold' : 'filter-chip-default'}"
       on:tap={clearFilters}
     />
+
 
     <!-- Emotion Chips -->
     {#each EMOTIONS as emotion}

@@ -43,7 +43,8 @@
       {#each group.entries as entry (entry.id)}
         <JournalEntryCard 
           {entry} 
-          on:editTags={() => handleEditTags(entry)} 
+          on:editTags 
+          on:openOptions 
         />
       {/each}
     {/each}
@@ -67,14 +68,8 @@
   export let entries: JournalEntry[] = [];
   export let isLoading: boolean = false;
 
-  const dispatch = createEventDispatcher();
-
   $: isFiltered = Boolean($searchQuery || $selectedEmotionFilter || $selectedTopicFilter);
   $: groupedEntries = groupEntriesByDate(entries);
-
-  function handleEditTags(entry: JournalEntry) {
-    dispatch('editTags', { entry });
-  }
 
   function clearAllFilters() {
     triggerTagSelectHaptic();
@@ -83,5 +78,7 @@
     selectedTopicFilter.set(null);
   }
 </script>
+
+
 
 
