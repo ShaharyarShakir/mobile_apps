@@ -23,18 +23,22 @@
       <gridLayout columns="*, auto" class="items-center">
         <label 
           col={0}
-          text={formatJournalTime(entry.createdAt)} 
+          text={entry.title || formatJournalTime(entry.createdAt)} 
           class="font-bold text-title text-sm" 
         />
         {#if isThisCardPlaying}
-          <Waveform active={true} compact={true} variant="play" />
+          <stackLayout col={1} class="ml-2">
+            <Waveform active={true} compact={true} variant="play" />
+          </stackLayout>
         {/if}
       </gridLayout>
       <label 
-        text={formatDuration(entryDurationMs)} 
+        text="{entry.title ? `${formatJournalTime(entry.createdAt)} · ` : ''}{formatDuration(entryDurationMs)}" 
         class="mt-0.5 font-mono text-muted text-xs" 
       />
     </stackLayout>
+
+
 
     <!-- More Actions (⋯) -->
     <button 
@@ -50,7 +54,7 @@
 
   <!-- Interactive Slider & Live Timestamp Progress (shown when this card is active) -->
   {#if isActiveCard}
-    <gridLayout columns="auto, *, auto" class="items-center mt-3 px-1 pt-2 border-gray-800/20 border-t">
+    <gridLayout columns="auto, *, auto" class="items-center mt-3 px-1 pt-2 card-divider">
       <label 
         col={0} 
         text={formatDuration(currentPositionDisplay)} 
@@ -128,8 +132,10 @@
   import { formatJournalTime } from '../utils/date';
   import { ICONS } from '../utils/icons';
   import { confirmDeleteEntry, showMissingAudioFileDialog, showPlaybackErrorAlert } from '../utils/dialogs';
+  import { triggerHapticFeedback } from '../utils/haptics';
   import TagPill from './journal/TagPill.svelte';
   import Waveform from './audio/Waveform.svelte';
+
 
   export let entry: JournalEntry;
 
@@ -218,26 +224,11 @@
     }
   }
 
-  async function handleMoreActions() {
-    const action = await Dialogs.action({
-      title: 'Voice Note Options',
-      cancelButtonText: 'Cancel',
-      actions: ['Edit Tags', 'Delete Recording']
-    });
-
-    if (action === 'Edit Tags') {
-      dispatch('editTags', { entry });
-    } else if (action === 'Delete Recording') {
-      const confirmed = await confirmDeleteEntry();
-      if (confirmed) {
-        try {
-          await deleteJournalEntry(entry.id);
-        } catch (err) {
-          console.error('[JournalEntryCard] Error deleting entry:', err);
-        }
-      }
-    }
+  function handleMoreActions() {
+    triggerHapticFeedback();
+    dispatch('openOptions', { entry });
   }
+
 </script>
 
 

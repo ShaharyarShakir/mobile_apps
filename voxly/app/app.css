@@ -28,8 +28,9 @@
 
 /* Global Font Enforcement for clean, crisp mobile typography */
 Page, Label, Button, TextField, TextView {
-  font-family: 'Roboto', 'Segoe UI', -apple-system, 'Helvetica Neue', sans-serif;
+  font-family: sans-serif;
 }
+
 
 /* Font Awesome definitions for NativeScript native icons */
 .fas {
@@ -488,6 +489,77 @@ Page, Label, Button, TextField, TextView {
   border-width: 1;
   color: #0369a1;
 }
+
+/* Card Divider */
+.card-divider {
+  border-top-color: #272d42;
+  border-top-width: 1;
+}
+
+.ns-light .card-divider {
+  border-top-color: #e2e8f0;
+  border-top-width: 1;
+}
+
+/* Modal Handle & Action Item Rows */
+.modal-handle {
+  background-color: #374151;
+  width: 40;
+  height: 4;
+  border-radius: 2;
+}
+
+.ns-light .modal-handle {
+  background-color: #cbd5e1;
+  width: 40;
+  height: 4;
+  border-radius: 2;
+}
+
+.action-item {
+  background-color: #191d2c;
+  border-color: #262d42;
+  border-width: 1;
+  border-radius: 18;
+}
+
+.action-item:highlighted {
+  background-color: #22283e;
+}
+
+.ns-light .action-item {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  border-width: 1;
+  border-radius: 18;
+}
+
+.ns-light .action-item:highlighted {
+  background-color: #f1f5f9;
+}
+
+.action-item-danger {
+  background-color: #261418;
+  border-color: #521c24;
+  border-width: 1;
+  border-radius: 18;
+}
+
+.action-item-danger:highlighted {
+  background-color: #381920;
+}
+
+.ns-light .action-item-danger {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+  border-width: 1;
+  border-radius: 18;
+}
+
+.ns-light .action-item-danger:highlighted {
+  background-color: #fee2e2;
+}
+
 
 
 
