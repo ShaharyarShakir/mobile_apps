@@ -45,16 +45,27 @@ export class AndroidAudioDriver implements AudioDriver {
 
       this.currentFilePath = cleanPath;
 
-      // Configure MediaRecorder for AAC / MPEG-4 audio recording
-      this.recorder.setAudioSource(android.media.MediaRecorder.AudioSource.MIC);
+      // Configure MediaRecorder with noise-suppressing hardware audio source
+      // VOICE_COMMUNICATION engages Android's hardware DSP (Acoustic Echo Cancellation + Noise Suppressor)
+      // which uses the secondary top microphone to cancel background static, hiss, and electrical noise
+      try {
+        this.recorder.setAudioSource(android.media.MediaRecorder.AudioSource.VOICE_COMMUNICATION);
+      } catch (e1) {
+        try {
+          this.recorder.setAudioSource(android.media.MediaRecorder.AudioSource.CAMCORDER);
+        } catch (e2) {
+          this.recorder.setAudioSource(android.media.MediaRecorder.AudioSource.MIC);
+        }
+      }
+
       this.recorder.setOutputFormat(android.media.MediaRecorder.OutputFormat.MPEG_4);
       this.recorder.setAudioEncoder(android.media.MediaRecorder.AudioEncoder.AAC);
-      this.recorder.setAudioEncodingBitRate(128000);
-      this.recorder.setAudioSamplingRate(44100);
+      this.recorder.setAudioEncodingBitRate(192000);
       this.recorder.setOutputFile(cleanPath);
 
       this.recorder.prepare();
       this.recorder.start();
+
 
       this.recordingStartTime = Date.now();
       this._isRecording = true;
@@ -76,6 +87,7 @@ export class AndroidAudioDriver implements AudioDriver {
       try {
         this.recorder.stop();
       } catch (stopErr) {
+
         console.warn('[AndroidAudioDriver] Note on recorder.stop():', stopErr);
       }
 

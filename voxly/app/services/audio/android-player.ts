@@ -54,6 +54,8 @@ export class AndroidAudioPlayerDriver implements AudioPlayerDriver {
         this.player.setAudioStreamType(android.media.AudioManager.STREAM_MUSIC);
       }
 
+
+
       this.player.setDataSource(cleanPath);
       this.player.prepare();
 
@@ -177,14 +179,16 @@ export class AndroidAudioPlayerDriver implements AudioPlayerDriver {
 
     try {
       if (typeof android !== 'undefined' && android.os.Build.VERSION.SDK_INT >= 23) {
-        const params = this.player.getPlaybackParams();
+        const params = new android.media.PlaybackParams();
         params.setSpeed(speed);
+        params.setPitch(1.0);
         this.player.setPlaybackParams(params);
       }
     } catch (err) {
       console.warn('[AndroidAudioPlayer] Error setting playback speed:', err);
     }
   }
+
 
 
   public async unload(): Promise<void> {
