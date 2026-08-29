@@ -1,4 +1,4 @@
-<stackLayout class="justify-center items-center my-5">
+<stackLayout class="items-center my-6" horizontalAlignment="center">
   {#if !$isRecording}
     <!-- ==================== IDLE STATE ==================== -->
     <gridLayout 
@@ -13,6 +13,7 @@
           class="shadow-lg rounded-full w-18 h-18 font-bold text-center btn-record-idle"
           on:tap={handleStartRecording}
           isEnabled={!isProcessing}
+          horizontalAlignment="center"
         >
           <formattedString>
             <span 
@@ -26,13 +27,17 @@
 
     <!-- Subtitle Prompt -->
     <label 
-      text="Record a thought" 
-      class="mt-3 font-semibold text-subtitle text-xs tracking-wide" 
+      text="Tap to record your thought" 
+      class="mt-3.5 font-semibold text-subtitle text-xs tracking-wider" 
+      horizontalAlignment="center"
+      textAlignment="center"
     />
   {:else}
     <!-- ==================== RECORDING STATE ==================== -->
     <!-- Equalizer / Waveform Visualization -->
-    <Waveform active={true} />
+    <stackLayout horizontalAlignment="center" class="mb-3">
+      <Waveform active={true} />
+    </stackLayout>
 
     <!-- Pulse Glow Record Button -->
     <gridLayout 
@@ -47,6 +52,7 @@
           class="shadow-xl rounded-full w-20 h-20 font-bold text-center btn-record-active"
           on:tap={handleStopRecording}
           isEnabled={!isProcessing}
+          horizontalAlignment="center"
         >
           <formattedString>
             <span 
@@ -61,15 +67,17 @@
     <!-- Prominent Recording Duration Timer -->
     <label 
       text={formatRecordingTime($recordingDuration)} 
-      class="mt-2 font-mono font-extrabold text-title text-2xl" 
+      class="mt-3 font-mono font-extrabold text-title text-2xl" 
+      horizontalAlignment="center"
+      textAlignment="center"
     />
 
     <!-- Stop & Cancel Action Buttons -->
-    <stackLayout orientation="horizontal" class="items-center mt-2.5">
+    <stackLayout orientation="horizontal" class="items-center mt-3" horizontalAlignment="center">
       <!-- Stop Button Pill -->
       <gridLayout 
         columns="auto, auto" 
-        class="items-center mr-2 px-5 py-2 rounded-full status-pill-active"
+        class="items-center mr-2 px-5 py-2.5 rounded-full status-pill-active"
         on:tap={handleStopRecording}
       >
         <label 
@@ -87,7 +95,7 @@
       <!-- Discard / Cancel Button Pill -->
       <gridLayout 
         columns="auto, auto" 
-        class="items-center px-4 py-2 rounded-full status-pill"
+        class="items-center px-4 py-2.5 rounded-full status-pill"
         on:tap={handleCancelRecording}
       >
         <label 
@@ -103,8 +111,8 @@
       </gridLayout>
     </stackLayout>
   {/if}
-
 </stackLayout>
+
 
 <script lang="ts">
   import { onDestroy, createEventDispatcher } from 'svelte';

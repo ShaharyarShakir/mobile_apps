@@ -6,13 +6,18 @@
   <gridLayout 
     row={1} 
     class="p-6 rounded-t-3xl modal-content" 
-    rows="auto, auto, auto, auto, auto, auto"
+    rows="auto, auto, auto, auto, auto, auto, auto, auto"
   >
+    <!-- Drag Handle Indicator -->
+    <stackLayout row={0} horizontalAlignment="center" class="mb-3">
+      <stackLayout class="modal-handle" />
+    </stackLayout>
+
     <!-- Header -->
-    <gridLayout row={0} columns="*, auto" class="mb-3">
+    <gridLayout row={1} columns="*, auto" class="items-center mb-3">
       <stackLayout col={0}>
-        <label text="Recording saved" class="font-bold text-title text-base" />
-        <label text="How are you feeling?" class="mt-0.5 text-subtitle text-xs" />
+        <label text="Edit Voice Thought" class="font-bold text-title text-base" />
+        <label text="Name your recording and add feelings" class="mt-0.5 text-subtitle text-xs" />
       </stackLayout>
       <button 
         col={1} 
@@ -25,60 +30,73 @@
       </button>
     </gridLayout>
 
+    <!-- Thought Name / Title Input -->
+    <label row={2} text="NAME / TITLE" class="mb-1.5 font-bold text-3xs text-subtitle uppercase tracking-wider" />
+    <gridLayout row={3} class="mb-4">
+      <textField 
+        text={titleText} 
+        hint="e.g. Morning Reflection, Meeting Notes..." 
+        class="px-4 py-2.5 rounded-2xl font-semibold text-title text-sm search-container"
+        on:textChange={(e) => titleText = e.value}
+        returnKeyType="done"
+      />
+    </gridLayout>
+
     <!-- Emotions Section -->
-    <flexboxLayout row={1} class="flex-wrap mb-4">
+    <label row={4} text="HOW ARE YOU FEELING?" class="mb-2 font-bold text-3xs text-subtitle uppercase tracking-wider" />
+    <flexboxLayout row={5} class="flex-wrap mb-3">
       {#each EMOTIONS as emotion}
         <button 
           text={capitalize(emotion)} 
-          class="rounded-full px-3.5 py-1.5 mr-2 mb-2 text-xs font-medium {selectedEmotion === emotion ? 'chip-tag-selected-emotion font-bold' : 'chip-tag'}"
+          class="rounded-full px-4 py-2 mr-2 mb-2 text-xs font-semibold {selectedEmotion === emotion ? 'chip-tag-selected-emotion font-bold' : 'chip-tag'}"
           on:tap={() => toggleEmotion(emotion)}
         />
       {/each}
     </flexboxLayout>
 
     <!-- Topics Section -->
-    <label row={2} text="Topic" class="mb-2 font-semibold text-title text-xs tracking-wide" />
-    <flexboxLayout row={3} class="flex-wrap mb-5">
+    <label row={6} text="WHAT IS THIS ABOUT?" class="mb-2 font-bold text-3xs text-subtitle uppercase tracking-wider" />
+    <flexboxLayout row={7} class="flex-wrap mb-5">
       {#each TOPICS as topic}
         <button 
           text={capitalize(topic)} 
-          class="rounded-full px-3.5 py-1.5 mr-2 mb-2 text-xs font-medium {selectedTopic === topic ? 'chip-tag-selected-topic font-bold' : 'chip-tag'}"
+          class="rounded-full px-4 py-2 mr-2 mb-2 text-xs font-semibold {selectedTopic === topic ? 'chip-tag-selected-topic font-bold' : 'chip-tag'}"
           on:tap={() => toggleTopic(topic)}
         />
       {/each}
     </flexboxLayout>
 
     <!-- Actions: Save & Skip -->
-    <gridLayout row={4} columns="*, *" class="gap-3">
+    <gridLayout row={8} columns="*, *" class="gap-3">
       <button 
         col={0} 
-        text="Skip" 
-        class="py-3 rounded-xl font-semibold text-subtitle text-xs text-center card-subtle"
+        text="Cancel" 
+        class="py-3.5 rounded-2xl font-bold text-subtitle text-xs text-center card-subtle"
         on:tap={handleSkip}
       />
       <button 
         col={1} 
-        text="Save" 
-        class="shadow-md py-3 rounded-xl font-bold text-xs text-center btn-record-idle"
+        text="Save Changes" 
+        class="shadow-md py-3.5 rounded-2xl font-bold text-xs text-center btn-record-idle"
         on:tap={handleSave}
       />
     </gridLayout>
   </gridLayout>
 </gridLayout>
 
-
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
   import { EMOTIONS, TOPICS } from '../models/journal';
   import type { JournalEntry, Emotion, Topic } from '../models/journal';
   import { updateJournalEntry } from '../stores/journal';
-  import { triggerTagSelectHaptic } from '../utils/haptics';
+  import { triggerTagSelectHaptic, triggerHapticFeedback } from '../utils/haptics';
   import { ICONS } from '../utils/icons';
 
   export let entry: JournalEntry;
 
   const dispatch = createEventDispatcher();
 
+  let titleText: string = entry.title || '';
   let selectedEmotion: string | undefined = entry.emotion;
   let selectedTopic: string | undefined = entry.topic;
 
@@ -99,8 +117,10 @@
 
   async function handleSave() {
     try {
+      triggerHapticFeedback();
       const updated: JournalEntry = {
         ...entry,
+        title: titleText.trim() || undefined,
         emotion: selectedEmotion || undefined,
         topic: selectedTopic || undefined
       };
@@ -115,4 +135,5 @@
     dispatch('close');
   }
 </script>
+
 
