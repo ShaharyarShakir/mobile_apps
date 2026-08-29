@@ -1,11 +1,13 @@
 export interface JournalEntry {
   id: string;
+  title?: string;
   audioUri: string;
   duration: number; // in milliseconds (or seconds)
   createdAt: string; // ISO 8601 string
   emotion?: string;
   topic?: string;
 }
+
 
 export const EMOTIONS = [
   'happy',
