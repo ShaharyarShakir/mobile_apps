@@ -65,3 +65,12 @@ export function triggerTagSelectHaptic(): void {
   }
 }
 
+/**
+ * Trigger generic interactive tactile feedback.
+ */
+export function triggerHapticFeedback(): void {
+  triggerRecordStartHaptic();
+}
+
+
+

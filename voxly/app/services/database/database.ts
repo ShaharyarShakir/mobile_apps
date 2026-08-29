@@ -304,6 +304,7 @@ export class DatabaseService {
     const createJournalEntriesTable = `
       CREATE TABLE IF NOT EXISTS journal_entries (
         id TEXT PRIMARY KEY NOT NULL,
+        title TEXT,
         audio_uri TEXT NOT NULL,
         duration INTEGER NOT NULL,
         created_at TEXT NOT NULL,
@@ -312,7 +313,15 @@ export class DatabaseService {
       );
     `;
     await driver.execute(createJournalEntriesTable);
+
+    // Seamlessly upgrade existing databases that were created before the title column was added
+    try {
+      await driver.execute('ALTER TABLE journal_entries ADD COLUMN title TEXT;');
+    } catch (_) {
+      // Column already exists, safe to ignore
+    }
   }
+
 
   public async execute(sql: string, params?: any[]): Promise<void> {
     await this.initialize();
