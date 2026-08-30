@@ -1,0 +1,25 @@
+{
+    "image": "mcr.microsoft.com/devcontainers/typescript-node",
+    "workspaceMount": "source=${localWorkspaceFolder}/..,target=/workspaces/mobile_apps,type=bind",
+    "workspaceFolder": "/workspaces/mobile_apps/tiny-com",
+    "features": {
+        "ghcr.io/Evit15/devcontainer-features/adb-fastboot:1": {
+            "installAdb": true
+        },
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "configureZshAsDefaultShell": true
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "ms-vscode.vscode-typescript-next",
+                "expo.vscode-expo",
+                "rodrigovallades.es7-react-js-snippets"
+            ]
+        }
+    }
+}
+
