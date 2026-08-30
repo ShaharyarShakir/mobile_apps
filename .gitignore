@@ -1,2 +1,4 @@
 .env
 google-services.json
+.devbox
+.pnpm-store

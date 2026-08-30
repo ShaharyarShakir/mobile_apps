@@ -7,7 +7,8 @@
             "installAdb": true
         },
         "ghcr.io/devcontainers/features/common-utils:2": {
-            "configureZshAsDefaultShell": true
+            "configureZshAsDefaultShell": true,
+            "ohMyZsh": true
         }
     }
 }
