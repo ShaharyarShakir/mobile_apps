@@ -1,0 +1,15 @@
+schemaVersion: "1"
+kind: mixin
+name: base-expo
+displayName: Base expo toolchain + network allowlist
+description: Shared network policy and tooling baseline for Node/TypeScript projects.
+
+network:
+  allowedDomains:
+    - "*.vsassets.io"
+    - "marketplace.visualstudio.com"
+    - "*.gallerycdn.vsassets.io"
+
+environment:
+  variables:
+    NODE_ENV: development
