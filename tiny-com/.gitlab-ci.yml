@@ -1,0 +1,58 @@
+stages:
+  - build
+  - release
+
+variables:
+  NODE_VERSION: "22"
+
+build_apk:
+  stage: build
+  image: node:${NODE_VERSION}-bookworm
+
+  rules:
+    - if: '$CI_COMMIT_TAG'
+
+  before_script:
+    - corepack enable
+    - pnpm install --frozen-lockfile || npm install
+    - npm install -g eas-cli
+
+  script:
+    - eas build --platform android --profile preview --non-interactive --wait --json > eas-build.json
+    - |
+      APK_URL=$(node -e "
+        const fs = require('fs');
+        const data = JSON.parse(fs.readFileSync('eas-build.json'));
+        const entry = Array.isArray(data) ? data[0] : data;
+        const url = entry?.artifacts?.buildUrl || entry?.artifacts?.applicationArchiveUrl;
+        if (!url) {
+          console.error('Failed to extract APK URL from EAS output:', JSON.stringify(data));
+          process.exit(1);
+        }
+        console.log(url);
+      ")
+      curl -L "$APK_URL" -o tiny-compressor.apk
+
+  artifacts:
+    paths:
+      - tiny-compressor.apk
+    expire_in: 30 days
+
+release:
+  stage: release
+  image: registry.gitlab.com/gitlab-org/cli:latest
+
+  rules:
+    - if: '$CI_COMMIT_TAG'
+
+  needs:
+    - job: build_apk
+      artifacts: true
+
+  script:
+    - |
+      glab release create "$CI_COMMIT_TAG" \
+        --name "Tiny Compressor $CI_COMMIT_TAG" \
+        --notes "Tiny Compressor Android release $CI_COMMIT_TAG" \
+        tiny-compressor.apk#Tiny-Compressor-${CI_COMMIT_TAG}.apk
+
