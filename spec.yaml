@@ -1,0 +1,27 @@
+schemaVersion: "1"
+kind: mixin
+name: base-node
+displayName: Base Node toolchain + network allowlist
+description: Shared network policy and tooling baseline for Node/TypeScript projects.
+
+network:
+  allowedDomains:
+    # apt / Debian mirrors
+    - "*.debian.org"
+    - "*.fastly.net"
+    # npm registry
+    - "registry.npmjs.org"
+    - "npmjs.org"
+    - "npmjs.com"
+    # VS Code Server download (needed for Remote - Containers)
+    - "update.code.visualstudio.com"
+    - "*.vscode-cdn.net"
+    - "vscode.download.prss.microsoft.com"
+    # GitHub (common for git operations, releases, actions)
+    - "github.com"
+    - "*.githubusercontent.com"
+    - "codeload.github.com"
+
+environment:
+  variables:
+    NODE_ENV: development
