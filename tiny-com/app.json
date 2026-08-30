@@ -1,14 +1,16 @@
 {
   "expo": {
     "name": "Tiny Compressor",
-    "slug": "tiny-com",
+    "slug": "tiny-compressor",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "tinycom",
-    "userInterfaceStyle": "automatic",
+    "scheme": "tinycompressor",
+    "userInterfaceStyle": "light",
+    "description": "Compress images and PDFs on your device.",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mytinyapps.tinycompressor"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +20,17 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.tinycom"
+      "package": "com.mytinyapps.tinycompressor",
+      "permissions": [
+        "READ_MEDIA_IMAGES",
+        "WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -34,11 +46,25 @@
           "imageWidth": 160
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Tiny Compressor to save compressed photos to your library.",
+          "savePhotosPermission": "Allow Tiny Compressor to save compressed photos to your library."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7b6d064e-ee2d-4cfd-bdd2-7f67d92396df"
+      }
+    },
+    "owner": "shaharyarshakir"
   }
 }
