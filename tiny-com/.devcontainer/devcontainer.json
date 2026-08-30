@@ -3,6 +3,9 @@
     "workspaceMount": "source=${localWorkspaceFolder}/..,target=/workspaces/mobile_apps,type=bind",
     "workspaceFolder": "/workspaces/mobile_apps/tiny-com",
     "features": {
+         "ghcr.io/devcontainers/features/java:1": {
+            "version": "17"
+        },
         "ghcr.io/evit15/devcontainer-features/adb-fastboot:1": {
             "installAdb": true
         },
