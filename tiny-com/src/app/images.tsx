@@ -1,13 +1,16 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Alert,
   FlatList,
   Pressable,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../theme/ThemeContext";
 import { EmptyState } from "../components/EmptyState";
 import { PrimaryButton } from "../components/PrimaryButton";
 import { SelectedFileCard } from "../components/SelectedFileCard";
@@ -18,6 +21,7 @@ import { SelectedFile } from "../types/file";
 
 export default function ImagesScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [files, setFiles] = useState<SelectedFile[]>(() =>
     fileStore.getImageFiles()
   );
@@ -78,29 +82,57 @@ export default function ImagesScreen() {
   const isAtLimit = files.length >= MAX_IMAGE_COUNT;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1">
+    <SafeAreaView
+      style={[styles.safeArea, { backgroundColor: colors.background }]}
+      edges={["top", "bottom"]}
+    >
+      <View style={styles.container}>
         {/* Navigation Header */}
-        <View className="flex-row items-center justify-between border-b border-neutral-100 px-6 py-4">
+        <View
+          style={[
+            styles.navHeader,
+            {
+              backgroundColor: colors.surface,
+              borderBottomColor: colors.border,
+            },
+          ]}
+        >
           <Pressable
             onPress={() => router.back()}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            className="flex-row items-center active:opacity-70"
+            style={styles.backButton}
             accessibilityRole="button"
-            accessibilityLabel="Back to home"
+            accessibilityLabel="Back"
           >
-            <Text className="text-lg font-semibold text-black">← Images</Text>
+            <Ionicons
+              name="chevron-back"
+              size={22}
+              color={colors.textPrimary}
+            />
+            <Text style={[styles.navTitle, { color: colors.textPrimary }]}>
+              Images
+            </Text>
           </Pressable>
 
           {files.length > 0 && !isAtLimit && (
             <Pressable
               onPress={handlePickImages}
               disabled={loading}
-              className="rounded-full bg-neutral-100 px-3.5 py-1.5 active:bg-neutral-200"
+              style={({ pressed }) => [
+                styles.addButton,
+                {
+                  backgroundColor: colors.accentSubtle,
+                  borderColor: colors.accent,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
               accessibilityRole="button"
               accessibilityLabel="Add more images"
             >
-              <Text className="text-sm font-semibold text-black">+ Add</Text>
+              <Ionicons name="add" size={16} color={colors.accent} />
+              <Text style={[styles.addButtonText, { color: colors.accent }]}>
+                Add More
+              </Text>
             </Pressable>
           )}
         </View>
@@ -108,21 +140,23 @@ export default function ImagesScreen() {
         {/* Content Area */}
         {files.length === 0 ? (
           <EmptyState
-            icon="📷"
+            iconName="images-outline"
             title="No images selected"
-            description="Choose photos to compress them."
+            description="Choose photos from your gallery to compress them without losing clarity."
             buttonTitle="Select Images"
             onSelect={handlePickImages}
             loading={loading}
           />
         ) : (
-          <View className="flex-1">
+          <View style={styles.listContainer}>
             {/* Selection Summary */}
-            <View className="flex-row items-center justify-between px-6 pt-5 pb-3">
-              <Text className="text-sm font-semibold text-black">
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryCount, { color: colors.textPrimary }]}>
                 {files.length} {files.length === 1 ? "image" : "images"} selected
               </Text>
-              <Text className="text-sm font-medium text-neutral-500">
+              <Text
+                style={[styles.summarySize, { color: colors.textSecondary }]}
+              >
                 Total: {formatFileSize(totalSize)}
               </Text>
             </View>
@@ -132,17 +166,28 @@ export default function ImagesScreen() {
               data={files}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <View className="px-6 py-1.5">
+                <View style={styles.cardWrapper}>
                   <SelectedFileCard file={item} onRemove={handleRemoveFile} />
                 </View>
               )}
-              contentContainerStyle={{ paddingBottom: 24 }}
+              contentContainerStyle={styles.listContent}
             />
 
             {/* Sticky Bottom Action */}
-            <View className="border-t border-neutral-100 bg-white p-6">
+            <View
+              style={[
+                styles.bottomBar,
+                {
+                  backgroundColor: colors.surface,
+                  borderTopColor: colors.border,
+                },
+              ]}
+            >
               <PrimaryButton
-                title="Compress →"
+                title={`Compress ${files.length} ${
+                  files.length === 1 ? "Image" : "Images"
+                } →`}
+                variant="accent"
                 onPress={handleContinue}
                 disabled={files.length === 0}
               />
@@ -153,3 +198,74 @@ export default function ImagesScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  navHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  navTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  addButtonText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  listContainer: {
+    flex: 1,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 10,
+  },
+  summaryCount: {
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  summarySize: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  listContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+  },
+  cardWrapper: {
+    marginBottom: 10,
+  },
+  bottomBar: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+  },
+});
