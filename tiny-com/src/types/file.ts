@@ -17,6 +17,8 @@ export type CompressionResult = {
   originalSize: number;
   compressedSize: number;
   savingsPercentage: number;
+  isAlreadyOptimized?: boolean;
+  optimizationNote?: string;
   error?: string;
 };
 
