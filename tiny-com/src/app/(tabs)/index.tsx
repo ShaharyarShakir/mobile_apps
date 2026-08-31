@@ -1,33 +1,16 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useCallback, useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Alert,
   FlatList,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { PresetSelector } from "../../components/PresetSelector";
-import { PrimaryButton } from "../../components/PrimaryButton";
-import { ProgressBar } from "../../components/ProgressBar";
-import { SelectedFileCard } from "../../components/SelectedFileCard";
-import { SuccessCheckmark } from "../../components/SuccessCheckmark";
-import {
-  CompressionPresetKey,
-  IMAGE_PRESETS,
-} from "../../constants/compression";
-import { calculateSavings, formatFileSize, getTotalSize } from "../../lib/fileUtils";
-import { triggerHaptic } from "../../lib/haptics";
-import { compressImagesBatch } from "../../lib/image/compressor";
-import { compressPDFsBatch } from "../../lib/pdf/compressor";
-import { MAX_IMAGE_COUNT, pickImages } from "../../lib/pickers/imagePicker";
-import { MAX_PDF_COUNT, pickPDFs } from "../../lib/pickers/pdfPicker";
-import { recentStore } from "../../lib/recentStore";
-import { settingsStore } from "../../lib/settingsStore";
-import { cleanupTempFiles, saveToDevice, shareFile } from "../../lib/storageService";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../../theme/ThemeContext";
 import {
   CompressionFileType,
@@ -37,11 +20,28 @@ import {
   PDFCompressionResult,
   SelectedFile,
 } from "../../types/file";
-
 import {
+  CompressionPresetKey,
+  IMAGE_PRESETS,
+} from "../../constants/compression";
+import { formatFileSize, getTotalSize, calculateSavings } from "../../lib/fileUtils";
+import { MAX_IMAGE_COUNT, pickImages } from "../../lib/pickers/imagePicker";
+import { MAX_PDF_COUNT, pickPDFs } from "../../lib/pickers/pdfPicker";
+import { compressImagesBatch } from "../../lib/image/compressor";
+import { compressPDFsBatch } from "../../lib/pdf/compressor";
+import { saveToDevice, shareFile, cleanupTempFiles } from "../../lib/storageService";
+import { settingsStore } from "../../lib/settingsStore";
+import { recentStore } from "../../lib/recentStore";
+import { triggerHaptic } from "../../lib/haptics";
+import { SelectedFileCard } from "../../components/SelectedFileCard";
+import { PresetSelector } from "../../components/PresetSelector";
+import { PrimaryButton } from "../../components/PrimaryButton";
+import { ProgressBar } from "../../components/ProgressBar";
+import { SuccessCheckmark } from "../../components/SuccessCheckmark";
+import {
+  logCompressionStarted,
   logCompressionCompleted,
   logCompressionFailed,
-  logCompressionStarted,
   logFileSaved,
   logFileShared,
 } from "../../lib/observeService";
@@ -214,16 +214,17 @@ export default function CompressScreen() {
 
         setImageResults(results);
 
-        // Stats & Recents
+        const valid = results.filter((r) => !r.error && !r.isAlreadyOptimized && r.savingsPercentage >= 3);
         const origTotal = results.reduce((acc, r) => acc + r.originalSize, 0);
         const compTotal = results.reduce((acc, r) => acc + r.compressedSize, 0);
         const saved = Math.max(0, origTotal - compTotal);
-        if (saved > 0) {
+
+        if (saved > 0 && valid.length > 0) {
           await settingsStore.addBytesSaved(saved);
         }
 
-        // Add to recent store
-        if (results.length === 1 && !results[0].error) {
+        // Add to recent store only if genuinely reduced
+        if (results.length === 1 && !results[0].error && !results[0].isAlreadyOptimized && results[0].savingsPercentage >= 3) {
           const item = results[0];
           await recentStore.addRecentItem({
             name: item.name,
@@ -233,21 +234,18 @@ export default function CompressScreen() {
             savingsPercentage: item.savingsPercentage,
             uri: item.compressedUri,
           });
-        } else if (results.length > 1) {
-          const valid = results.filter((r) => !r.error);
-          if (valid.length > 0) {
-            const vOrig = valid.reduce((acc, r) => acc + r.originalSize, 0);
-            const vComp = valid.reduce((acc, r) => acc + r.compressedSize, 0);
-            await recentStore.addRecentItem({
-              name: `${valid.length} Compressed Images`,
-              type: "image",
-              originalSize: vOrig,
-              compressedSize: vComp,
-              savingsPercentage: calculateSavings(vOrig, vComp),
-              uri: valid[0].compressedUri,
-              itemCount: valid.length,
-            });
-          }
+        } else if (valid.length > 0) {
+          const vOrig = valid.reduce((acc, r) => acc + r.originalSize, 0);
+          const vComp = valid.reduce((acc, r) => acc + r.compressedSize, 0);
+          await recentStore.addRecentItem({
+            name: `${valid.length} Compressed Images`,
+            type: "image",
+            originalSize: vOrig,
+            compressedSize: vComp,
+            savingsPercentage: calculateSavings(vOrig, vComp),
+            uri: valid[0].compressedUri,
+            itemCount: valid.length,
+          });
         }
 
         const durationMs = Date.now() - startTime;
@@ -261,14 +259,16 @@ export default function CompressScreen() {
 
         setPdfResults(results);
 
+        const valid = results.filter((r) => !r.error && !r.isAlreadyOptimized && r.savingsPercentage >= 3);
         const origTotal = results.reduce((acc, r) => acc + r.originalSize, 0);
         const compTotal = results.reduce((acc, r) => acc + r.compressedSize, 0);
         const saved = Math.max(0, origTotal - compTotal);
-        if (saved > 0) {
+
+        if (saved > 0 && valid.length > 0) {
           await settingsStore.addBytesSaved(saved);
         }
 
-        if (results.length === 1 && !results[0].error) {
+        if (results.length === 1 && !results[0].error && !results[0].isAlreadyOptimized && results[0].savingsPercentage >= 3) {
           const item = results[0];
           await recentStore.addRecentItem({
             name: item.name,
@@ -278,21 +278,18 @@ export default function CompressScreen() {
             savingsPercentage: item.savingsPercentage,
             uri: item.compressedUri,
           });
-        } else if (results.length > 1) {
-          const valid = results.filter((r) => !r.error);
-          if (valid.length > 0) {
-            const vOrig = valid.reduce((acc, r) => acc + r.originalSize, 0);
-            const vComp = valid.reduce((acc, r) => acc + r.compressedSize, 0);
-            await recentStore.addRecentItem({
-              name: `${valid.length} Compressed PDFs`,
-              type: "pdf",
-              originalSize: vOrig,
-              compressedSize: vComp,
-              savingsPercentage: calculateSavings(vOrig, vComp),
-              uri: valid[0].compressedUri,
-              itemCount: valid.length,
-            });
-          }
+        } else if (valid.length > 0) {
+          const vOrig = valid.reduce((acc, r) => acc + r.originalSize, 0);
+          const vComp = valid.reduce((acc, r) => acc + r.compressedSize, 0);
+          await recentStore.addRecentItem({
+            name: `${valid.length} Compressed PDFs`,
+            type: "pdf",
+            originalSize: vOrig,
+            compressedSize: vComp,
+            savingsPercentage: calculateSavings(vOrig, vComp),
+            uri: valid[0].compressedUri,
+            itemCount: valid.length,
+          });
         }
 
         const durationMs = Date.now() - startTime;
@@ -314,7 +311,7 @@ export default function CompressScreen() {
     triggerHaptic("light");
 
     if (selectedType === "image") {
-      const valid = imageResults.filter((r) => r.compressedUri && !r.error);
+      const valid = imageResults.filter((r) => r.compressedUri && !r.error && !r.isAlreadyOptimized);
       let successCount = 0;
       for (const item of valid) {
         if (item.compressedUri) {
@@ -330,7 +327,7 @@ export default function CompressScreen() {
         Alert.alert("Saved", valid.length === 1 ? "Image saved to Photos." : `Saved ${successCount} of ${valid.length} images to Photos.`);
       }
     } else {
-      const valid = pdfResults.filter((r) => r.compressedUri && !r.error);
+      const valid = pdfResults.filter((r) => r.compressedUri && !r.error && !r.isAlreadyOptimized);
       if (valid.length > 0 && valid[0].compressedUri) {
         const res = await saveToDevice(valid[0].compressedUri, valid[0].name, "pdf");
         setIsSaving(false);
@@ -350,13 +347,15 @@ export default function CompressScreen() {
     logFileShared(selectedType);
     if (selectedType === "image") {
       const firstValid = imageResults.find((r) => r.compressedUri && !r.error);
-      if (firstValid && firstValid.compressedUri) {
-        await shareFile(firstValid.compressedUri, "image/jpeg");
+      const uriToShare = firstValid?.compressedUri || files[0]?.uri;
+      if (uriToShare) {
+        await shareFile(uriToShare, "image/jpeg");
       }
     } else {
       const firstValid = pdfResults.find((r) => r.compressedUri && !r.error);
-      if (firstValid && firstValid.compressedUri) {
-        await shareFile(firstValid.compressedUri, "application/pdf");
+      const uriToShare = firstValid?.compressedUri || files[0]?.uri;
+      if (uriToShare) {
+        await shareFile(uriToShare, "application/pdf");
       }
     }
   };
@@ -375,7 +374,7 @@ export default function CompressScreen() {
   const totalResultsOrig = results.reduce((acc, r) => acc + r.originalSize, 0);
   const totalResultsComp = results.reduce((acc, r) => acc + r.compressedSize, 0);
   const overallSavingsPercent = calculateSavings(totalResultsOrig, totalResultsComp);
-  const allAlreadyOptimized = results.length > 0 && results.every((r) => (r as PDFCompressionResult).isAlreadyOptimized || r.compressedSize >= r.originalSize);
+  const allAlreadyOptimized = results.length > 0 && results.every((r) => (r as PDFCompressionResult).isAlreadyOptimized || r.savingsPercentage < 3 || r.compressedSize >= r.originalSize);
   const allFailed = results.length > 0 && results.every((r) => r.error);
   const hasMultiple = files.length > 1;
 
@@ -694,224 +693,337 @@ export default function CompressScreen() {
               contentContainerStyle={styles.resultsScroll}
               showsVerticalScrollIndicator={false}
             >
-              {/* Header Status */}
-              <View style={styles.resultHeader}>
-                <SuccessCheckmark
-                  iconName={
-                    allFailed
-                      ? "alert-circle"
-                      : allAlreadyOptimized
-                      ? "information-circle"
-                      : "checkmark-sharp"
-                  }
-                  color="#FFFFFF"
-                  bgColor={
-                    allFailed
-                      ? colors.danger
-                      : allAlreadyOptimized
-                      ? "#3B82F6"
-                      : colors.success
-                  }
-                />
-
-                <Text style={[styles.resultTitle, { color: colors.textPrimary }]}>
-                  {allFailed
-                    ? "Couldn't compress this file"
-                    : allAlreadyOptimized
-                    ? "Already optimized"
-                    : "Compression complete"}
-                </Text>
-
-                <Text style={[styles.resultSubtitle, { color: colors.textSecondary }]}>
-                  {allFailed
-                    ? "Please try again with a different preset or file."
-                    : allAlreadyOptimized
-                    ? "This file is already close to its smallest practical size."
-                    : hasMultiple
-                    ? `${results.filter((r) => !r.error).length} of ${results.length} files compressed`
-                    : results[0]?.name}
-                </Text>
-              </View>
-
-              {/* Metric Card */}
-              {!allFailed && (
-                <View
-                  style={[
-                    styles.metricCard,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
-                  {/* Single or Batch Summary */}
-                  <View style={styles.metricRow}>
-                    <View style={styles.metricCol}>
-                      <Text style={[styles.metricLabel, { color: colors.textMuted }]}>
-                        BEFORE
-                      </Text>
-                      <Text style={[styles.metricBefore, { color: colors.textSecondary }]}>
-                        {formatFileSize(totalResultsOrig)}
-                      </Text>
-                    </View>
-
-                    <Ionicons
-                      name="arrow-forward"
-                      size={18}
-                      color={colors.textMuted}
-                      style={{ marginTop: 16 }}
-                    />
-
-                    <View style={[styles.metricCol, { alignItems: "flex-end" }]}>
-                      <Text style={[styles.metricLabel, { color: colors.textMuted }]}>
-                        AFTER
-                      </Text>
-                      <Text style={[styles.metricAfter, { color: colors.textPrimary }]}>
-                        {formatFileSize(totalResultsComp)}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View
-                    style={[
-                      styles.metricDivider,
-                      { backgroundColor: colors.borderSubtle },
-                    ]}
-                  />
-
-                  {/* Savings pill banner */}
-                  <View style={styles.savingsRow}>
-                    <View>
-                      <Text style={[styles.metricLabel, { color: colors.textMuted }]}>
-                        TOTAL SAVED
-                      </Text>
-                      <Text style={[styles.savedAmount, { color: colors.accent }]}>
-                        {formatFileSize(Math.max(0, totalResultsOrig - totalResultsComp))}
-                      </Text>
-                    </View>
-
+              {/* =============================================================== */}
+              {/* CASE A: ALREADY OPTIMIZED (No meaningful reduction possible)   */}
+              {/* =============================================================== */}
+              {allAlreadyOptimized ? (
+                <View style={styles.resultsInnerCol}>
+                  <View style={styles.resultHeader}>
                     <View
                       style={[
-                        styles.savingsPill,
-                        { backgroundColor: colors.accentSubtle },
-                      ]}
-                    >
-                      <Text style={[styles.savingsPillText, { color: colors.accent }]}>
-                        {overallSavingsPercent > 0
-                          ? `${overallSavingsPercent.toFixed(1)}% smaller`
-                          : "Optimized"}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              )}
-
-              {/* Action Buttons: Save & Share */}
-              {!allFailed && (
-                <View style={styles.resultActionsCol}>
-                  <PrimaryButton
-                    title={
-                      isSaving
-                        ? "Saving..."
-                        : savedSuccess
-                        ? isImage
-                          ? "Saved to Photos ✓"
-                          : "Saved ✓"
-                        : isImage
-                        ? hasMultiple
-                          ? "Save All to Photos"
-                          : "Save File"
-                        : "Save PDF"
-                    }
-                    variant="accent"
-                    iconName={savedSuccess ? "checkmark" : "download-outline"}
-                    onPress={handleSave}
-                    disabled={isSaving}
-                  />
-
-                  <PrimaryButton
-                    title="Share"
-                    variant="secondary"
-                    iconName="share-outline"
-                    onPress={handleShare}
-                  />
-                </View>
-              )}
-
-              {/* Processed Files Breakdown (if multiple or detail needed) */}
-              {results.length > 1 && (
-                <View style={styles.breakdownSection}>
-                  <Text style={[styles.breakdownHeader, { color: colors.textMuted }]}>
-                    PROCESSED FILES ({results.length})
-                  </Text>
-
-                  {results.map((item) => (
-                    <View
-                      key={item.id}
-                      style={[
-                        styles.breakdownCard,
+                        styles.statusCircle,
                         {
-                          backgroundColor: colors.surface,
-                          borderColor: colors.border,
+                          backgroundColor: isDark
+                            ? "rgba(59, 130, 246, 0.16)"
+                            : "rgba(59, 130, 246, 0.1)",
+                          borderColor: isDark ? "rgba(59, 130, 246, 0.4)" : "#93C5FD",
                         },
                       ]}
                     >
-                      <View style={styles.breakdownInfo}>
+                      <Ionicons name="information-circle" size={32} color="#3B82F6" />
+                    </View>
+
+                    <Text style={[styles.resultTitle, { color: colors.textPrimary }]}>
+                      Already Optimized
+                    </Text>
+
+                    <Text style={[styles.resultSubtitle, { color: colors.textSecondary }]}>
+                      This file is already at its smallest practical size. No further reduction is possible without losing clarity.
+                    </Text>
+                  </View>
+
+                  {/* Single Clean File Info Card */}
+                  <View
+                    style={[
+                      styles.infoCard,
+                      {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                  >
+                    <View style={styles.infoCardRow}>
+                      <View
+                        style={[
+                          styles.infoIconBox,
+                          { backgroundColor: colors.surfaceSubtle },
+                        ]}
+                      >
+                        <Ionicons
+                          name={isImage ? "images" : "document-text"}
+                          size={20}
+                          color={colors.accent}
+                        />
+                      </View>
+
+                      <View style={styles.infoCardContent}>
                         <Text
                           numberOfLines={1}
                           ellipsizeMode="middle"
-                          style={[styles.breakdownName, { color: colors.textPrimary }]}
+                          style={[styles.infoCardName, { color: colors.textPrimary }]}
                         >
-                          {item.name}
+                          {hasMultiple ? `${files.length} Files` : files[0]?.name}
                         </Text>
-                        <View style={styles.breakdownSizes}>
-                          <Text style={[styles.breakdownOldSize, { color: colors.textMuted }]}>
-                            {formatFileSize(item.originalSize)}
-                          </Text>
-                          <Text style={{ color: colors.textMuted }}>→</Text>
-                          <Text style={[styles.breakdownNewSize, { color: colors.textPrimary }]}>
-                            {formatFileSize(item.compressedSize)}
-                          </Text>
-                          {item.savingsPercentage > 0 && (
-                            <Text style={[styles.breakdownPercent, { color: colors.accent }]}>
-                              (-{item.savingsPercentage.toFixed(0)}%)
-                            </Text>
-                          )}
-                        </View>
+                        <Text style={[styles.infoCardSize, { color: colors.textSecondary }]}>
+                          Size: {formatFileSize(totalOriginalSize)}
+                        </Text>
                       </View>
 
-                      {item.compressedUri && !item.error && (
-                        <Pressable
-                          onPress={() => handleShareSingle(item.compressedUri, isImage ? "image/jpeg" : "application/pdf")}
-                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                          style={({ pressed }) => [
-                            styles.breakdownShareBtn,
+                      <View
+                        style={[
+                          styles.optimalBadge,
+                          { backgroundColor: colors.surfaceSubtle, borderColor: colors.border },
+                        ]}
+                      >
+                        <Text style={[styles.optimalBadgeText, { color: colors.textSecondary }]}>
+                          Optimal Size
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Clean Actions: Primary button to choose another file */}
+                  <View style={styles.resultActionsCol}>
+                    <PrimaryButton
+                      title="Choose Another File"
+                      variant="accent"
+                      iconName="refresh-outline"
+                      onPress={handleReset}
+                    />
+
+                    <PrimaryButton
+                      title="Share Original File"
+                      variant="secondary"
+                      iconName="share-outline"
+                      onPress={handleShare}
+                    />
+                  </View>
+                </View>
+              ) : allFailed ? (
+                /* =============================================================== */
+                /* CASE B: FAILED COMPRESSION                                      */
+                /* =============================================================== */
+                <View style={styles.resultsInnerCol}>
+                  <View style={styles.resultHeader}>
+                    <View
+                      style={[
+                        styles.statusCircle,
+                        {
+                          backgroundColor: colors.dangerSubtle,
+                          borderColor: colors.danger,
+                        },
+                      ]}
+                    >
+                      <Ionicons name="alert-circle" size={32} color={colors.danger} />
+                    </View>
+
+                    <Text style={[styles.resultTitle, { color: colors.textPrimary }]}>
+                      Couldn't Compress File
+                    </Text>
+
+                    <Text style={[styles.resultSubtitle, { color: colors.textSecondary }]}>
+                      The file could not be reduced. Please try again with another file.
+                    </Text>
+                  </View>
+
+                  <View style={styles.resultActionsCol}>
+                    <PrimaryButton
+                      title="Try Another File"
+                      variant="accent"
+                      iconName="refresh-outline"
+                      onPress={handleReset}
+                    />
+                  </View>
+                </View>
+              ) : (
+                /* =============================================================== */
+                /* CASE C: SUCCESSFUL COMPRESSION (Real savings achieved)          */
+                /* =============================================================== */
+                <View style={styles.resultsInnerCol}>
+                  <View style={styles.resultHeader}>
+                    <SuccessCheckmark
+                      iconName="checkmark-sharp"
+                      color="#FFFFFF"
+                      bgColor={colors.success}
+                    />
+
+                    <Text style={[styles.resultTitle, { color: colors.textPrimary }]}>
+                      Compression Complete
+                    </Text>
+
+                    <Text style={[styles.resultSubtitle, { color: colors.textSecondary }]}>
+                      {hasMultiple
+                        ? `${results.filter((r) => !r.error && !r.isAlreadyOptimized).length} of ${results.length} files compressed`
+                        : results[0]?.name}
+                    </Text>
+                  </View>
+
+                  {/* Metric Card */}
+                  <View
+                    style={[
+                      styles.metricCard,
+                      {
+                        backgroundColor: colors.surface,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                  >
+                    <View style={styles.metricRow}>
+                      <View style={styles.metricCol}>
+                        <Text style={[styles.metricLabel, { color: colors.textMuted }]}>
+                          BEFORE
+                        </Text>
+                        <Text style={[styles.metricBefore, { color: colors.textSecondary }]}>
+                          {formatFileSize(totalResultsOrig)}
+                        </Text>
+                      </View>
+
+                      <Ionicons
+                        name="arrow-forward"
+                        size={18}
+                        color={colors.textMuted}
+                        style={{ marginTop: 16 }}
+                      />
+
+                      <View style={[styles.metricCol, { alignItems: "flex-end" }]}>
+                        <Text style={[styles.metricLabel, { color: colors.textMuted }]}>
+                          AFTER
+                        </Text>
+                        <Text style={[styles.metricAfter, { color: colors.textPrimary }]}>
+                          {formatFileSize(totalResultsComp)}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.metricDivider,
+                        { backgroundColor: colors.borderSubtle },
+                      ]}
+                    />
+
+                    {/* Savings Row */}
+                    <View style={styles.savingsRow}>
+                      <View>
+                        <Text style={[styles.metricLabel, { color: colors.textMuted }]}>
+                          TOTAL SAVED
+                        </Text>
+                        <Text style={[styles.savedAmount, { color: colors.accent }]}>
+                          {formatFileSize(Math.max(0, totalResultsOrig - totalResultsComp))}
+                        </Text>
+                      </View>
+
+                      <View
+                        style={[
+                          styles.savingsPill,
+                          { backgroundColor: colors.accentSubtle },
+                        ]}
+                      >
+                        <Text style={[styles.savingsPillText, { color: colors.accent }]}>
+                          {overallSavingsPercent > 0
+                            ? `${overallSavingsPercent.toFixed(1)}% smaller`
+                            : "Optimized"}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Actions: Save & Share */}
+                  <View style={styles.resultActionsCol}>
+                    <PrimaryButton
+                      title={
+                        isSaving
+                          ? "Saving..."
+                          : savedSuccess
+                          ? isImage
+                            ? "Saved to Photos ✓"
+                            : "Saved ✓"
+                          : isImage
+                          ? hasMultiple
+                            ? "Save All to Photos"
+                            : "Save File"
+                          : "Save PDF"
+                      }
+                      variant="accent"
+                      iconName={savedSuccess ? "checkmark" : "download-outline"}
+                      onPress={handleSave}
+                      disabled={isSaving}
+                    />
+
+                    <PrimaryButton
+                      title="Share"
+                      variant="secondary"
+                      iconName="share-outline"
+                      onPress={handleShare}
+                    />
+                  </View>
+
+                  {/* Processed Files Breakdown (if multiple files) */}
+                  {results.length > 1 && (
+                    <View style={styles.breakdownSection}>
+                      <Text style={[styles.breakdownHeader, { color: colors.textMuted }]}>
+                        PROCESSED FILES ({results.length})
+                      </Text>
+
+                      {results.map((item) => (
+                        <View
+                          key={item.id}
+                          style={[
+                            styles.breakdownCard,
                             {
-                              backgroundColor: colors.surfaceSubtle,
-                              opacity: pressed ? 0.7 : 1,
+                              backgroundColor: colors.surface,
+                              borderColor: colors.border,
                             },
                           ]}
                         >
-                          <Ionicons name="share-outline" size={14} color={colors.textSecondary} />
-                        </Pressable>
-                      )}
+                          <View style={styles.breakdownInfo}>
+                            <Text
+                              numberOfLines={1}
+                              ellipsizeMode="middle"
+                              style={[styles.breakdownName, { color: colors.textPrimary }]}
+                            >
+                              {item.name}
+                            </Text>
+                            <View style={styles.breakdownSizes}>
+                              <Text style={[styles.breakdownOldSize, { color: colors.textMuted }]}>
+                                {formatFileSize(item.originalSize)}
+                              </Text>
+                              <Text style={{ color: colors.textMuted }}>→</Text>
+                              <Text style={[styles.breakdownNewSize, { color: colors.textPrimary }]}>
+                                {formatFileSize(item.compressedSize)}
+                              </Text>
+                              {item.savingsPercentage > 0 && (
+                                <Text style={[styles.breakdownPercent, { color: colors.accent }]}>
+                                  (-{item.savingsPercentage.toFixed(0)}%)
+                                </Text>
+                              )}
+                            </View>
+                          </View>
+
+                          {item.compressedUri && !item.error && !item.isAlreadyOptimized && (
+                            <Pressable
+                              onPress={() => handleShareSingle(item.compressedUri, isImage ? "image/jpeg" : "application/pdf")}
+                              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                              style={({ pressed }) => [
+                                styles.breakdownShareBtn,
+                                {
+                                  backgroundColor: colors.surfaceSubtle,
+                                  opacity: pressed ? 0.7 : 1,
+                                },
+                              ]}
+                            >
+                              <Ionicons name="share-outline" size={14} color={colors.textSecondary} />
+                            </Pressable>
+                          )}
+                        </View>
+                      ))}
                     </View>
-                  ))}
+                  )}
+
+                  {/* Compress Another Action */}
+                  <Pressable
+                    onPress={handleReset}
+                    style={({ pressed }) => [
+                      styles.compressAnotherBtn,
+                      { opacity: pressed ? 0.7 : 1 },
+                    ]}
+                  >
+                    <Text style={[styles.compressAnotherText, { color: colors.textSecondary }]}>
+                      Compress another file
+                    </Text>
+                  </Pressable>
                 </View>
               )}
-
-              {/* Compress Another Action */}
-              <Pressable
-                onPress={handleReset}
-                style={({ pressed }) => [
-                  styles.compressAnotherBtn,
-                  { opacity: pressed ? 0.7 : 1 },
-                ]}
-              >
-                <Text style={[styles.compressAnotherText, { color: colors.textSecondary }]}>
-                  Compress another file
-                </Text>
-              </Pressable>
             </ScrollView>
           </View>
         )}
@@ -1128,9 +1240,21 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     alignItems: "center",
   },
+  resultsInnerCol: {
+    width: "100%",
+    alignItems: "center",
+  },
   resultHeader: {
     alignItems: "center",
     marginBottom: 20,
+  },
+  statusCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
   },
   resultTitle: {
     fontSize: 22,
@@ -1145,6 +1269,49 @@ const styles = StyleSheet.create({
     marginTop: 4,
     textAlign: "center",
     paddingHorizontal: 20,
+    lineHeight: 18,
+  },
+  infoCard: {
+    width: "100%",
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 14,
+    marginBottom: 20,
+  },
+  infoCardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  infoIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  infoCardContent: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  infoCardName: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  infoCardSize: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  optimalBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  optimalBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
   },
   metricCard: {
     width: "100%",
