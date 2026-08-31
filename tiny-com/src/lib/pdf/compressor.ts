@@ -1,19 +1,19 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImageManipulator from "expo-image-manipulator";
 import {
-    PDFDocument,
-    PDFName,
-    PDFNumber,
-    PDFRawStream,
+  PDFDocument,
+  PDFName,
+  PDFNumber,
+  PDFRawStream,
 } from "pdf-lib";
 import {
-    PDF_PRESET_DETAILS,
-    PDFPresetKey,
+  PDF_PRESET_DETAILS,
+  PDFPresetKey,
 } from "../../constants/compression";
 import {
-    PDFCompressionProgress,
-    PDFCompressionResult,
-    SelectedFile,
+  PDFCompressionProgress,
+  PDFCompressionResult,
+  SelectedFile,
 } from "../../types/file";
 import { calculateSavings, getFileSizeAsync } from "../fileUtils";
 
@@ -86,10 +86,27 @@ export async function compressPDF(
       });
     }
 
-    // 2. Load into pdf-lib (ignoreEncryption allows parsing password-free protected structures)
-    const doc = await PDFDocument.load(pdfBase64, {
-      ignoreEncryption: true,
-    });
+    // 2. Load into pdf-lib (suppress non-critical parser recovery warnings)
+    const originalWarn = console.warn;
+    console.warn = (...args: unknown[]) => {
+      const msg = args.map(String).join(" ");
+      if (
+        msg.includes("Trying to parse invalid object") ||
+        msg.includes("Invalid object ref:")
+      ) {
+        return;
+      }
+      originalWarn(...args);
+    };
+
+    let doc: PDFDocument;
+    try {
+      doc = await PDFDocument.load(pdfBase64, {
+        ignoreEncryption: true,
+      });
+    } finally {
+      console.warn = originalWarn;
+    }
 
     // 3. Find embedded image XObjects
     const imageObjects: Array<{ ref: unknown; obj: PDFRawStream }> = [];
@@ -176,8 +193,11 @@ export async function compressPDF(
       });
     }
 
-    // 5. Save the modified PDF
-    const compressedPdfBase64 = await doc.saveAsBase64({ dataUri: false });
+    // 5. Save the modified PDF with object streams enabled
+    const compressedPdfBase64 = await doc.saveAsBase64({
+      dataUri: false,
+      useObjectStreams: true,
+    });
     const outFileName = `compressed_${Date.now()}_${file.name}`;
     const outputPath = `${FileSystem.cacheDirectory}${outFileName}`;
     await FileSystem.writeAsStringAsync(outputPath, compressedPdfBase64, {
@@ -206,7 +226,12 @@ export async function compressPDF(
     }
 
     // 7. Validate output against original
-    if (compressedSize >= originalSize) {
+    const rawSavingsPercentage = calculateSavings(originalSize, compressedSize);
+    const isMinimalSavings = rawSavingsPercentage < 3 || compressedSize >= originalSize;
+
+    if (isMinimalSavings) {
+      // Clean up the temporary file since original is already optimal
+      await FileSystem.deleteAsync(outputPath, { idempotent: true });
       return {
         id: file.id,
         name: file.name,
@@ -216,12 +241,9 @@ export async function compressPDF(
         compressedSize: originalSize,
         savingsPercentage: 0,
         isAlreadyOptimized: true,
-        optimizationNote: "This PDF is already optimized.",
+        optimizationNote: "This file is already close to its smallest practical size.",
       };
     }
-
-    const savingsPercentage = calculateSavings(originalSize, compressedSize);
-    const isMinimalSavings = savingsPercentage < 2;
 
     return {
       id: file.id,
@@ -230,11 +252,8 @@ export async function compressPDF(
       compressedUri: outputPath,
       originalSize,
       compressedSize,
-      savingsPercentage,
-      isAlreadyOptimized: isMinimalSavings,
-      optimizationNote: isMinimalSavings
-        ? "Already close to its smallest size."
-        : undefined,
+      savingsPercentage: rawSavingsPercentage,
+      isAlreadyOptimized: false,
     };
   } catch {
     return {

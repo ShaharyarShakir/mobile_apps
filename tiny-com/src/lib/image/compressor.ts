@@ -1,9 +1,9 @@
-import * as ImageManipulator from "expo-image-manipulator";
 import * as FileSystem from "expo-file-system/legacy";
+import * as ImageManipulator from "expo-image-manipulator";
 import {
-  CompressionProgress,
-  CompressionResult,
-  SelectedFile,
+    CompressionProgress,
+    CompressionResult,
+    SelectedFile,
 } from "../../types/file";
 import { calculateSavings, getFileSizeAsync } from "../fileUtils";
 
@@ -60,7 +60,24 @@ export async function compressImage(
     compressedSize = originalSize;
   }
 
-  const savingsPercentage = calculateSavings(originalSize, compressedSize);
+  const rawSavingsPercentage = calculateSavings(originalSize, compressedSize);
+  const isMinimalSavings = rawSavingsPercentage < 3 || compressedSize >= originalSize;
+
+  if (isMinimalSavings) {
+    // Cleanup temporary image file
+    await FileSystem.deleteAsync(manipResult.uri, { idempotent: true });
+    return {
+      id: image.id,
+      name: image.name,
+      originalUri: image.uri,
+      compressedUri: image.uri,
+      originalSize,
+      compressedSize: originalSize,
+      savingsPercentage: 0,
+      isAlreadyOptimized: true,
+      optimizationNote: "This image is already close to its smallest practical size.",
+    };
+  }
 
   return {
     id: image.id,
@@ -69,7 +86,8 @@ export async function compressImage(
     compressedUri: manipResult.uri,
     originalSize,
     compressedSize,
-    savingsPercentage,
+    savingsPercentage: rawSavingsPercentage,
+    isAlreadyOptimized: false,
   };
 }
 
