@@ -1,62 +1,130 @@
-import { Image, Pressable, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { formatFileSize } from "../lib/fileUtils";
+import { triggerHaptic } from "../lib/haptics";
+import { useTheme } from "../theme/ThemeContext";
 import { SelectedFile } from "../types/file";
 
 type SelectedFileCardProps = {
   file: SelectedFile;
   onRemove: (id: string) => void;
-  className?: string;
 };
 
-export function SelectedFileCard({
-  file,
-  onRemove,
-  className = "",
-}: SelectedFileCardProps) {
+export function SelectedFileCard({ file, onRemove }: SelectedFileCardProps) {
+  const { colors, isDark } = useTheme();
   const isImage = file.type === "image";
+
+  const handleRemove = () => {
+    triggerHaptic("light");
+    onRemove(file.id);
+  };
 
   return (
     <View
-      className={`flex-row items-center rounded-2xl border border-neutral-200 bg-white p-3.5 ${className}`}
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.border,
+        },
+      ]}
     >
       {/* Thumbnail or Document Icon */}
       {isImage ? (
         <Image
           source={{ uri: file.uri }}
-          className="h-16 w-16 rounded-xl bg-neutral-100"
+          style={[styles.thumbnail, { backgroundColor: colors.surfaceSubtle }]}
           resizeMode="cover"
         />
       ) : (
-        <View className="h-16 w-16 items-center justify-center rounded-xl bg-neutral-100">
-          <Text className="text-3xl">📄</Text>
+        <View
+          style={[
+            styles.docIconBox,
+            {
+              backgroundColor: isDark
+                ? "rgba(244, 63, 94, 0.12)"
+                : "rgba(225, 29, 72, 0.08)",
+            },
+          ]}
+        >
+          <Ionicons name="document-text" size={22} color={colors.accent} />
         </View>
       )}
 
       {/* File Info */}
-      <View className="ml-3.5 flex-1 justify-center pr-2">
+      <View style={styles.fileInfo}>
         <Text
           numberOfLines={1}
           ellipsizeMode="middle"
-          className="text-base font-semibold text-black"
+          style={[styles.fileName, { color: colors.textPrimary }]}
         >
           {file.name}
         </Text>
-        <Text className="mt-1 text-sm font-medium text-neutral-500">
+        <Text style={[styles.fileSize, { color: colors.textSecondary }]}>
           {formatFileSize(file.size)}
         </Text>
       </View>
 
       {/* Remove Button */}
       <Pressable
-        onPress={() => onRemove(file.id)}
+        onPress={handleRemove}
         hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-        className="h-9 w-9 items-center justify-center rounded-full bg-neutral-100 active:bg-neutral-200"
+        style={({ pressed }) => [
+          styles.removeButton,
+          {
+            backgroundColor: colors.surfaceSubtle,
+            opacity: pressed ? 0.7 : 1,
+          },
+        ]}
         accessibilityRole="button"
         accessibilityLabel={`Remove ${file.name}`}
       >
-        <Text className="text-sm font-bold text-neutral-600">✕</Text>
+        <Ionicons name="close" size={16} color={colors.textSecondary} />
       </Pressable>
     </View>
   );
 }
 
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 10,
+  },
+  thumbnail: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+  },
+  docIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  fileInfo: {
+    flex: 1,
+    marginLeft: 10,
+    paddingRight: 8,
+  },
+  fileName: {
+    fontSize: 14,
+    fontWeight: "700",
+    letterSpacing: -0.1,
+  },
+  fileSize: {
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  removeButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

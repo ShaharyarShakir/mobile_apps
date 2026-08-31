@@ -1,22 +1,46 @@
-import { View } from "react-native";
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import { useTheme } from "../theme/ThemeContext";
 
 type ProgressBarProps = {
   progress: number; // 0 to 100
-  className?: string;
+  style?: object;
 };
 
-export function ProgressBar({ progress, className = "" }: ProgressBarProps) {
+export function ProgressBar({ progress, style }: ProgressBarProps) {
+  const { colors } = useTheme();
   const clamped = Math.min(100, Math.max(0, progress));
 
   return (
     <View
-      className={`h-2.5 w-full overflow-hidden rounded-full bg-neutral-100 ${className}`}
+      style={[
+        styles.track,
+        { backgroundColor: colors.surfaceSubtle },
+        style,
+      ]}
     >
       <View
-        className="h-full rounded-full bg-black"
-        style={{ width: `${clamped}%` }}
+        style={[
+          styles.fill,
+          {
+            width: `${clamped}%`,
+            backgroundColor: colors.accent,
+          },
+        ]}
       />
     </View>
   );
 }
 
+const styles = StyleSheet.create({
+  track: {
+    height: 10,
+    width: "100%",
+    borderRadius: 5,
+    overflow: "hidden",
+  },
+  fill: {
+    height: "100%",
+    borderRadius: 5,
+  },
+});
