@@ -1,8 +1,11 @@
-import { Text, View } from "react-native";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "../theme/ThemeContext";
 import { PrimaryButton } from "./PrimaryButton";
 
 type EmptyStateProps = {
-  icon: string;
+  iconName: keyof typeof Ionicons.glyphMap;
   title?: string;
   description?: string;
   buttonTitle: string;
@@ -11,25 +14,43 @@ type EmptyStateProps = {
 };
 
 export function EmptyState({
-  icon,
+  iconName,
   title = "No files selected",
   description = "Choose files to compress them.",
   buttonTitle,
   onSelect,
   loading = false,
 }: EmptyStateProps) {
+  const { colors, isDark } = useTheme();
+
   return (
-    <View className="flex-1 items-center justify-center px-6 py-12">
-      <Text className="mb-4 text-5xl">{icon}</Text>
-      <Text className="text-center text-xl font-bold tracking-tight text-black">
+    <View style={styles.container}>
+      <View
+        style={[
+          styles.iconBox,
+          {
+            backgroundColor: isDark
+              ? "rgba(244, 63, 94, 0.14)"
+              : "rgba(225, 29, 72, 0.08)",
+            borderColor: isDark ? "rgba(244, 63, 94, 0.25)" : "transparent",
+            borderWidth: isDark ? 1 : 0,
+          },
+        ]}
+      >
+        <Ionicons name={iconName} size={42} color={colors.accent} />
+      </View>
+
+      <Text style={[styles.title, { color: colors.textPrimary }]}>
         {title}
       </Text>
-      <Text className="mt-2 text-center text-base font-medium text-neutral-500">
+      <Text style={[styles.description, { color: colors.textSecondary }]}>
         {description}
       </Text>
-      <View className="mt-8 w-full max-w-xs">
+
+      <View style={styles.buttonWrapper}>
         <PrimaryButton
           title={buttonTitle}
+          variant="accent"
           onPress={onSelect}
           loading={loading}
         />
@@ -38,3 +59,38 @@ export function EmptyState({
   );
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 48,
+  },
+  iconBox: {
+    width: 88,
+    height: 88,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "800",
+    letterSpacing: -0.4,
+    textAlign: "center",
+  },
+  description: {
+    fontSize: 15,
+    fontWeight: "500",
+    marginTop: 8,
+    textAlign: "center",
+    lineHeight: 22,
+  },
+  buttonWrapper: {
+    marginTop: 28,
+    width: "100%",
+    maxWidth: 280,
+  },
+});
