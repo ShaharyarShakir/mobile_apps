@@ -1,29 +1,34 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-    FlatList,
-    Image,
-    Pressable,
-    Text,
-    View,
+  Alert,
+  FlatList,
+  Image,
+  Pressable,
+  Text,
+  View,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { PresetSelector } from "../components/PresetSelector";
-import { PrimaryButton } from "../components/PrimaryButton";
-import { ProgressBar } from "../components/ProgressBar";
 import {
-    IMAGE_PRESET_DETAILS,
-    IMAGE_PRESETS,
-    ImagePresetKey,
+  IMAGE_PRESET_DETAILS,
+  IMAGE_PRESETS,
+  ImagePresetKey,
 } from "../constants/compression";
+import {
+  CompressionProgress,
+  CompressionResult,
+  SelectedFile,
+} from "../types/file";
 import { fileStore } from "../lib/fileStore";
 import { calculateSavings, formatFileSize, getTotalSize } from "../lib/fileUtils";
 import { compressImagesBatch } from "../lib/image/compressor";
-import {
-    CompressionProgress,
-    CompressionResult,
-    SelectedFile,
-} from "../types/file";
+import { cleanupTempFiles, saveToDevice, shareFile } from "../lib/storageService";
+import { monetizationStore } from "../lib/monetizationStore";
+import { PresetSelector } from "../components/PresetSelector";
+import { ProgressBar } from "../components/ProgressBar";
+import { PrimaryButton } from "../components/PrimaryButton";
+import { SuccessCheckmark } from "../components/SuccessCheckmark";
+import { UpgradeModal } from "../components/UpgradeModal";
 
 type ScreenState = "idle" | "compressing" | "completed";
 
@@ -39,9 +44,32 @@ export default function CompressImageScreen() {
     currentFileName: "",
   });
   const [results, setResults] = useState<CompressionResult[]>([]);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedAll, setSavedAll] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      // Clean up temp compressed images when screen unmounts if already done
+      if (results.length > 0) {
+        const uris = results
+          .map((r) => r.compressedUri)
+          .filter(Boolean) as string[];
+        cleanupTempFiles(uris);
+      }
+    };
+  }, [results]);
 
   const handleStartCompression = async () => {
     if (files.length === 0) return;
+
+    // Check Pro entitlement
+    const canCompress = await monetizationStore.canCompress(files.length);
+    if (!canCompress) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     setStatus("compressing");
 
     try {
@@ -51,10 +79,48 @@ export default function CompressImageScreen() {
       });
       setResults(batchResults);
       fileStore.setImageResults(batchResults);
+      await monetizationStore.recordCompressions(batchResults.length);
       setStatus("completed");
     } catch {
+      Alert.alert("Error", "Couldn't compress files. Please try again.");
       setStatus("idle");
     }
+  };
+
+  const handleSaveAll = async () => {
+    const validResults = results.filter((r) => r.compressedUri && !r.error);
+    if (validResults.length === 0) return;
+
+    setSaving(true);
+    let successCount = 0;
+    for (const item of validResults) {
+      if (item.compressedUri) {
+        const res = await saveToDevice(item.compressedUri, item.name, "image");
+        if (res.success) successCount++;
+      }
+    }
+    setSaving(false);
+
+    if (successCount === validResults.length) {
+      setSavedAll(true);
+      Alert.alert("Saved", "All compressed images saved to your Photos.");
+    } else {
+      Alert.alert(
+        "Partial Save",
+        `Saved ${successCount} of ${validResults.length} images.`
+      );
+    }
+  };
+
+  const handleShareAll = async () => {
+    const firstValid = results.find((r) => r.compressedUri && !r.error);
+    if (!firstValid || !firstValid.compressedUri) return;
+    await shareFile(firstValid.compressedUri, "image/jpeg");
+  };
+
+  const handleShareItem = async (item: CompressionResult) => {
+    if (!item.compressedUri) return;
+    await shareFile(item.compressedUri, "image/jpeg");
   };
 
   const handleDone = () => {
@@ -152,7 +218,7 @@ export default function CompressImageScreen() {
         {status === "compressing" && (
           <View className="flex-1 items-center justify-center px-8">
             <Text className="text-2xl font-extrabold tracking-tight text-black">
-              Compressing...
+              Compressing images…
             </Text>
 
             <Text className="mt-4 text-3xl font-black text-black">
@@ -181,9 +247,12 @@ export default function CompressImageScreen() {
         {status === "completed" && (
           <View className="flex-1 justify-between">
             <View className="flex-1 px-6 pt-4">
-              <Text className="text-2xl font-extrabold tracking-tight text-black">
-                Compression complete
-              </Text>
+              <View className="flex-row items-center">
+                <SuccessCheckmark />
+                <Text className="ml-3 text-2xl font-extrabold tracking-tight text-black">
+                  Compression complete
+                </Text>
+              </View>
 
               {/* Summary Metric Card */}
               <View className="my-4 rounded-2xl border border-neutral-200 bg-neutral-50 p-5">
@@ -219,6 +288,31 @@ export default function CompressImageScreen() {
                     </Text>
                   </View>
                 </View>
+              </View>
+
+              {/* Quick Actions (Save / Share) */}
+              <View className="mb-4 flex-row gap-3">
+                <Pressable
+                  onPress={handleSaveAll}
+                  disabled={saving || successfulCount === 0}
+                  className={`flex-1 flex-row items-center justify-center rounded-xl border border-neutral-200 py-3 active:bg-neutral-100 ${
+                    savedAll ? "bg-neutral-100" : "bg-white"
+                  }`}
+                >
+                  <Text className="mr-1.5 text-base">{savedAll ? "✓" : "💾"}</Text>
+                  <Text className="text-sm font-bold text-black">
+                    {savedAll ? "Saved to Photos" : "Save to Photos"}
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleShareAll}
+                  disabled={successfulCount === 0}
+                  className="flex-1 flex-row items-center justify-center rounded-xl border border-neutral-200 bg-white py-3 active:bg-neutral-100"
+                >
+                  <Text className="mr-1.5 text-base">📤</Text>
+                  <Text className="text-sm font-bold text-black">Share</Text>
+                </Pressable>
               </View>
 
               {failedCount > 0 && (
@@ -271,6 +365,15 @@ export default function CompressImageScreen() {
                         </View>
                       )}
                     </View>
+                    {item.compressedUri && !item.error && (
+                      <Pressable
+                        onPress={() => handleShareItem(item)}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-neutral-100 active:bg-neutral-200"
+                      >
+                        <Text className="text-xs">📤</Text>
+                      </Pressable>
+                    )}
                   </View>
                 )}
                 contentContainerStyle={{ paddingBottom: 16 }}
@@ -284,7 +387,13 @@ export default function CompressImageScreen() {
           </View>
         )}
       </View>
+
+      {/* Pro Lifetime Upgrade Sheet */}
+      <UpgradeModal
+        visible={showUpgradeModal}
+        onClose={() => setShowUpgradeModal(false)}
+        onUnlocked={handleStartCompression}
+      />
     </SafeAreaView>
   );
 }
-
