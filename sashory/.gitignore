@@ -49,3 +49,8 @@ coverage
 .cache
 tmp
 temp
+
+# android
+android/
+
+.devpod-internal/
