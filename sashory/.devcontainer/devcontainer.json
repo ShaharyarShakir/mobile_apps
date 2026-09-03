@@ -1,0 +1,27 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/typescript-node",
+
+  "workspaceMount": "source=${localWorkspaceFolder}/..,target=/workspaces/mobile_apps,type=bind",
+  "workspaceFolder": "/workspaces/mobile_apps/sashory",
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "17"
+    },
+
+    "ghcr.io/nordcominc/devcontainer-features/android-sdk:1": {
+      "platform": "36",
+      "build_tools": "36.0.0",
+      "extra_packages": "platforms;android-36 platform-tools"
+    },
+
+    "ghcr.io/evit15/devcontainer-features/adb-fastboot:1": {
+      "installAdb": true
+    },
+
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "configureZshAsDefaultShell": true,
+      "ohMyZsh": true
+    }
+  }
+}
