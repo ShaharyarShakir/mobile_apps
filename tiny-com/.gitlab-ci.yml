@@ -4,6 +4,8 @@ stages:
 
 variables:
   NODE_VERSION: "22"
+  APK_NAME: "tiny-compressor.apk"
+  PACKAGE_NAME: "tiny-compressor"
 
 build_apk:
   stage: build
@@ -18,29 +20,49 @@ build_apk:
     - npm install -g eas-cli
 
   script:
+    - echo "Building ${PACKAGE_NAME} ${CI_COMMIT_TAG}"
     - eas build --platform android --profile preview --non-interactive --wait --json > eas-build.json
+
     - |
       APK_URL=$(node -e "
         const fs = require('fs');
-        const data = JSON.parse(fs.readFileSync('eas-build.json'));
+
+        const data = JSON.parse(
+          fs.readFileSync('eas-build.json', 'utf8')
+        );
+
         const entry = Array.isArray(data) ? data[0] : data;
-        const url = entry?.artifacts?.buildUrl || entry?.artifacts?.applicationArchiveUrl;
+
+        const url =
+          entry?.artifacts?.buildUrl ||
+          entry?.artifacts?.applicationArchiveUrl;
+
         if (!url) {
-          console.error('Failed to extract APK URL from EAS output:', JSON.stringify(data));
+          console.error(
+            'Failed to extract APK URL from EAS output:',
+            JSON.stringify(data, null, 2)
+          );
           process.exit(1);
         }
+
         console.log(url);
       ")
-      curl -L "$APK_URL" -o tiny-compressor.apk
+
+      echo "Downloading APK from EAS..."
+      curl -fL "$APK_URL" -o "${APK_NAME}"
+
+      echo "APK downloaded:"
+      ls -lh "${APK_NAME}"
 
   artifacts:
     paths:
       - tiny-compressor.apk
     expire_in: 30 days
 
+
 release:
   stage: release
-  image: registry.gitlab.com/gitlab-org/cli:latest
+  image: curlimages/curl:latest
 
   rules:
     - if: '$CI_COMMIT_TAG'
@@ -51,8 +73,36 @@ release:
 
   script:
     - |
-      glab release create "$CI_COMMIT_TAG" \
-        --name "Tiny Compressor $CI_COMMIT_TAG" \
-        --notes "Tiny Compressor Android release $CI_COMMIT_TAG" \
-        tiny-compressor.apk#Tiny-Compressor-${CI_COMMIT_TAG}.apk
+      echo "Uploading APK to GitLab Package Registry..."
+      PACKAGE_URL="${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${CI_COMMIT_TAG}/${APK_NAME}"
+      curl --fail-with-body \
+        --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --upload-file "${APK_NAME}" \
+        "${PACKAGE_URL}"
+      echo "Package uploaded successfully."
 
+    - |
+      echo "Creating GitLab release..."
+      RELEASE_RESPONSE=$(curl --fail-with-body \
+        --request POST \
+        --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"name\": \"Tiny Compressor ${CI_COMMIT_TAG}\",
+          \"tag_name\": \"${CI_COMMIT_TAG}\",
+          \"description\": \"Tiny Compressor Android release ${CI_COMMIT_TAG}\"
+        }" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/releases")
+      echo "${RELEASE_RESPONSE}"
+
+    - |
+      echo "Adding APK to GitLab Release..."
+      RELEASE_ASSET_RESPONSE=$(curl --fail-with-body \
+        --request POST \
+        --header "JOB-TOKEN: ${CI_JOB_TOKEN}" \
+        --data-urlencode "name=Tiny Compressor ${CI_COMMIT_TAG} APK" \
+        --data-urlencode "url=${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${PACKAGE_NAME}/${CI_COMMIT_TAG}/${APK_NAME}" \
+        --data-urlencode "filepath=/downloads/${APK_NAME}" \
+        --data-urlencode "link_type=package" \
+        "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/releases/${CI_COMMIT_TAG}/assets/links")
+      echo "${RELEASE_ASSET_RESPONSE}"
