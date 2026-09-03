@@ -1,0 +1,69 @@
+schemaVersion: "2"
+kind: mixin
+name: my-vscode
+displayName: My VS Code Tunnel + DevPod
+description: Installs the VS Code CLI + DevPod and opens a tunnel for remote editing
+
+permissions:
+  network:
+    allow:
+      # VS Code CLI download + tunnel relay
+      - code.visualstudio.com
+      - "*.vscode-cdn.net"
+      - update.code.visualstudio.com
+      - "*.trafficmanager.net"
+      - "*.servicebus.windows.net"
+      # GitHub device-auth + release downloads
+      - github.com
+      - "*.github.com"
+      - api.github.com
+      - objects.githubusercontent.com
+      - release-assets.githubusercontent.com
+      # devcontainer package installs
+      - "*.npmjs.org"
+      - registry.npmjs.org
+      - "*.pypi.org"
+      - files.pythonhosted.org
+      - deb.debian.org
+      - archive.ubuntu.com
+      - security.ubuntu.com
+      - ghcr.io
+      - registry-1.docker.io
+      - raw.githubusercontent.com
+      - get.sdkman.io
+      - api.sdkman.io
+setup:
+  install:
+    - command: |
+        set -e
+        ARCH=$(uname -m)
+        case "$ARCH" in
+          x86_64)  CLI_OS="cli-alpine-x64" ;;
+          aarch64) CLI_OS="cli-alpine-arm64" ;;
+          *) echo "unsupported arch: $ARCH"; exit 1 ;;
+        esac
+        curl -Lk "https://code.visualstudio.com/sha/download?build=stable&os=${CLI_OS}" \
+          --output /tmp/vscode_cli.tar.gz
+        tar -xf /tmp/vscode_cli.tar.gz -C /usr/local/bin
+        rm /tmp/vscode_cli.tar.gz
+      description: Install the standalone VS Code CLI
+
+    - command: |
+        set -e
+        ARCH=$(uname -m)
+        case "$ARCH" in
+          x86_64)  DP_ARCH="amd64" ;;
+          aarch64) DP_ARCH="arm64" ;;
+          *) echo "unsupported arch: $ARCH"; exit 1 ;;
+        esac
+        curl -L -o /tmp/devpod \
+          "https://github.com/loft-sh/devpod/releases/latest/download/devpod-linux-${DP_ARCH}"
+        install -c -m 0755 /tmp/devpod /usr/local/bin/devpod
+        rm -f /tmp/devpod
+      description: Install DevPod CLI
+
+  startup:
+    - command: ["code", "tunnel", "--accept-server-license-terms"]
+      user: "1000"
+      background: true
+      description: Start the VS Code tunnel on every sandbox start
