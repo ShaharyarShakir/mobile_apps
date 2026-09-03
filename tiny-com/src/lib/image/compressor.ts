@@ -1,9 +1,9 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImageManipulator from "expo-image-manipulator";
 import {
-    CompressionProgress,
-    CompressionResult,
-    SelectedFile,
+  CompressionProgress,
+  CompressionResult,
+  SelectedFile,
 } from "../../types/file";
 import { calculateSavings, getFileSizeAsync } from "../fileUtils";
 

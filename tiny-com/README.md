@@ -58,3 +58,10 @@ Tiny Compressor integrates `expo-observe` to monitor application startup perform
 # Non-interactive APK build for GitLab release
 eas build --platform android --profile preview --non-interactive
 ```
+
+### Direct Download URL Format
+Every tagged release publishes the APK with a permanent release asset link:
+```text
+https://gitlab.com/ShaharyarShakir/tiny-com/-/releases/<TAG>/downloads/tiny-compressor.apk
+```
+*Example:* `https://gitlab.com/ShaharyarShakir/tiny-com/-/releases/v0.0.4/downloads/tiny-compressor.apk`
