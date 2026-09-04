@@ -32,6 +32,18 @@ export default function AppLayout() {
           title: "Projects",
         }}
       />
+      <Stack.Screen
+        name="project/[id]"
+        options={{
+          title: "Project",
+        }}
+      />
+      <Stack.Screen
+        name="project/[id]/edit"
+        options={{
+          title: "Edit Project",
+        }}
+      />
     </Stack>
   );
 }
