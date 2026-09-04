@@ -11,9 +11,12 @@ import {
 } from "heroui-native";
 import { useRef } from "react";
 import { Text, TextInput, View } from "react-native";
+import { useRouter } from "expo-router";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
+import { queryClient } from "@/lib/query-client";
+import { queryKeys } from "@/lib/query-keys";
 
 const signUpSchema = z.object({
   name: z.string().trim().min(1, "Name is required").min(2, "Name must be at least 2 characters"),
@@ -52,6 +55,7 @@ export function SignUp() {
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm({
     defaultValues: {
@@ -63,28 +67,31 @@ export function SignUp() {
       onSubmit: signUpSchema,
     },
     onSubmit: async ({ value, formApi }) => {
-      await authClient.signUp.email(
-        {
-          name: value.name.trim(),
-          email: value.email.trim(),
-          password: value.password,
-        },
-        {
-          onError(error) {
-            toast.show({
-              variant: "danger",
-              label: error.error?.message || "Failed to sign up",
-            });
-          },
-          onSuccess() {
-            formApi.reset();
-            toast.show({
-              variant: "success",
-              label: "Account created successfully",
-            });
-          },
-        },
-      );
+      const result = await authClient.signUp.email({
+        name: value.name.trim(),
+        email: value.email.trim(),
+        password: value.password,
+      });
+
+      if (result.error) {
+        toast.show({
+          variant: "danger",
+          label: result.error.message || "Failed to sign up",
+        });
+        return;
+      }
+
+      formApi.reset();
+      toast.show({
+        variant: "success",
+        label: "Account created successfully",
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.auth.session,
+      });
+
+      router.replace("/(app)/home");
     },
   });
 
@@ -180,6 +187,13 @@ export function SignUp() {
                     <Button.Label>Create Account</Button.Label>
                   )}
                 </Button>
+
+                <View className="flex-row justify-center items-center mt-2">
+                  <Text className="text-muted-foreground text-sm">Already have an account? </Text>
+                  <Button variant="ghost" size="sm" onPress={() => router.push("/(auth)/sign-in")}>
+                    <Button.Label>Sign In</Button.Label>
+                  </Button>
+                </View>
               </View>
             </>
           );
@@ -188,3 +202,6 @@ export function SignUp() {
     </Surface>
   );
 }
+
+export default SignUp;
+
