@@ -5,6 +5,12 @@
   "containerEnv": {
     "JAVA_HOME": "/usr/local/sdkman/candidates/java/current"
   },
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/common-utils",
+    "ghcr.io/devcontainers/features/java",
+    "ghcr.io/evit15/devcontainer-features/adb-fastboot",
+    "ghcr.io/nordcominc/devcontainer-features/android-sdk"
+  ],
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
       "version": "17"
