@@ -11,9 +11,12 @@ import {
 } from "heroui-native";
 import { useRef } from "react";
 import { Text, TextInput, View } from "react-native";
+import { useRouter } from "expo-router";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
+import { queryClient } from "@/lib/query-client";
+import { queryKeys } from "@/lib/query-keys";
 
 const signInSchema = z.object({
   email: z.string().trim().min(1, "Email is required").email("Enter a valid email address"),
@@ -50,6 +53,7 @@ function getErrorMessage(error: unknown): string | null {
 function SignIn() {
   const passwordInputRef = useRef<TextInput>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm({
     defaultValues: {
@@ -60,27 +64,30 @@ function SignIn() {
       onSubmit: signInSchema,
     },
     onSubmit: async ({ value, formApi }) => {
-      await authClient.signIn.email(
-        {
-          email: value.email.trim(),
-          password: value.password,
-        },
-        {
-          onError(error) {
-            toast.show({
-              variant: "danger",
-              label: error.error?.message || "Failed to sign in",
-            });
-          },
-          onSuccess() {
-            formApi.reset();
-            toast.show({
-              variant: "success",
-              label: "Signed in successfully",
-            });
-          },
-        },
-      );
+      const result = await authClient.signIn.email({
+        email: value.email.trim(),
+        password: value.password,
+      });
+
+      if (result.error) {
+        toast.show({
+          variant: "danger",
+          label: result.error.message || "Failed to sign in",
+        });
+        return;
+      }
+
+      formApi.reset();
+      toast.show({
+        variant: "success",
+        label: "Signed in successfully",
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.auth.session,
+      });
+
+      router.replace("/(app)/home");
     },
   });
 
@@ -154,6 +161,13 @@ function SignIn() {
                     <Button.Label>Sign In</Button.Label>
                   )}
                 </Button>
+
+                <View className="flex-row justify-center items-center mt-2">
+                  <Text className="text-muted-foreground text-sm">Don't have an account? </Text>
+                  <Button variant="ghost" size="sm" onPress={() => router.push("/(auth)/sign-up")}>
+                    <Button.Label>Sign Up</Button.Label>
+                  </Button>
+                </View>
               </View>
             </>
           );
@@ -164,3 +178,5 @@ function SignIn() {
 }
 
 export { SignIn };
+export default SignIn;
+

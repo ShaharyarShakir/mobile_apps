@@ -10,9 +10,13 @@ export default function ProfileScreen() {
 
   const handleSignOut = async () => {
     const result = await signOut();
-    if (!result?.error) {
-      router.replace("/(auth)/sign-in");
+
+    if (result.error) {
+      console.error(result.error);
+      return;
     }
+
+    router.replace("/(auth)/sign-in");
   };
 
   return (
