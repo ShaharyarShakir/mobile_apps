@@ -26,6 +26,12 @@ export default function AppLayout() {
           title: "Profile",
         }}
       />
+      <Stack.Screen
+        name="projects"
+        options={{
+          title: "Projects",
+        }}
+      />
     </Stack>
   );
 }

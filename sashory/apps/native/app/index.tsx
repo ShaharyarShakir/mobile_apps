@@ -1,31 +1,24 @@
-import { useAuthSession } from '@/hooks/use-auth-session'
-import { useRouter } from 'expo-router'
-import React, { useEffect } from 'react'
-import { View, Text } from 'react-native'
-import { StatusBar } from 'expo-status-bar'
-import OnboardingSplashContainer from '@/components/containers/onboarding-splash-container'
-export default function Home() {
-    const router = useRouter()
-    const { data: session, isPending } = useAuthSession()
-    useEffect(() => {
-        if (!isPending && session?.data?.user) {
-            const user = session.data.user
-            //TODO:
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { Redirect } from "expo-router";
+import OnboardingSplashContainer from "@/components/containers/onboarding-splash-container";
+import { StatusBar } from "expo-status-bar";
 
-        }
-    }, [isPending, session, router])
+export default function Index() {
+  const { data: session, isPending } = useAuthSession();
 
-    if (isPending) {
-        return (
-            <>
-                <StatusBar style='auto' />
-                <OnboardingSplashContainer />
-            </>
-        )
-    }
+  if (isPending) {
     return (
-        <View>
-            <Text>Home Page</Text>
-        </View>
-    )
+      <>
+        <StatusBar style="auto" />
+        <OnboardingSplashContainer />
+      </>
+    );
+  }
+
+  if (!session?.user) {
+    return <Redirect href="/(auth)/sign-in" />;
+  }
+
+  return <Redirect href="/(app)/home" />;
 }
+
