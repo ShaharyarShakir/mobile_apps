@@ -1,7 +1,13 @@
 {
-  "name": "server",
+  "name": "@sashory/server",
   "type": "module",
   "main": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
   "scripts": {
     "build": "tsdown",
     "check-types": "tsc -b",
@@ -15,6 +21,7 @@
     "@sashory/env": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.1",
     "hono": "^4.8.2",
     "zod": "catalog:"
   },
