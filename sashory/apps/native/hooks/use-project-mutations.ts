@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export function useCreateProject() {
   const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export function useCreateProject() {
 
       if (!response.ok) {
         throw new Error(
-          `Failed to create project: ${response.status}`,
+          await getApiErrorMessage(response, "Failed to create project"),
         );
       }
 
@@ -44,7 +45,7 @@ export function useUpdateProject() {
       name?: string;
       description?: string | null;
     }) => {
-      const response = await api.api.projects[":id"].$patch({
+      const response = await (api.api.projects[":id"].$patch as any)({
         param: {
           id,
         },
@@ -56,7 +57,7 @@ export function useUpdateProject() {
 
       if (!response.ok) {
         throw new Error(
-          `Failed to update project: ${response.status}`,
+          await getApiErrorMessage(response, "Failed to update project"),
         );
       }
 
@@ -70,9 +71,7 @@ export function useUpdateProject() {
         }),
 
         queryClient.invalidateQueries({
-          queryKey: queryKeys.projects.detail(
-            variables.id,
-          ),
+          queryKey: queryKeys.projects.detail(variables.id),
         }),
       ]);
     },
@@ -92,7 +91,7 @@ export function useDeleteProject() {
 
       if (!response.ok) {
         throw new Error(
-          `Failed to delete project: ${response.status}`,
+          await getApiErrorMessage(response, "Failed to delete project"),
         );
       }
     },
@@ -110,5 +109,3 @@ export function useDeleteProject() {
     },
   });
 }
-
-
