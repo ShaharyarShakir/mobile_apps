@@ -1,0 +1,1 @@
+ALTER TABLE "project" ADD CONSTRAINT "project_name_length_check" CHECK (char_length(trim("project"."name")) > 0);
