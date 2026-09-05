@@ -24,12 +24,15 @@ bun install
 
 ## Database Setup
 
-This project uses PostgreSQL with Drizzle ORM.
+This project uses PostgreSQL with Drizzle ORM running in Docker.
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+1. Start the PostgreSQL container:
 
-3. Apply the schema to your database:
+```bash
+bun run db:up
+```
+
+2. Apply the schema to your database:
 
 ```bash
 bun run db:push
@@ -63,6 +66,9 @@ sashory/
 - `bun run dev:server`: Start only the server
 - `bun run check-types`: Check TypeScript types across all apps
 - `bun run dev:native`: Start the React Native/Expo development server
+- `bun run db:up`: Start PostgreSQL database container (Docker)
+- `bun run db:down`: Stop PostgreSQL database container
+- `bun run db:logs`: View PostgreSQL container logs
 - `bun run db:push`: Push schema changes to database
 - `bun run db:generate`: Generate database client/types
 - `bun run db:migrate`: Run database migrations
