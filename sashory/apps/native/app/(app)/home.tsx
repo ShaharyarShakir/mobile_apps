@@ -31,9 +31,21 @@ export default function HomeScreen() {
         </Text>
         <Text className="text-muted-foreground">{data.user.email}</Text>
       </View>
-      <Button onPress={() => router.push("/(app)/profile")}>
-        <Button.Label>Go to Profile</Button.Label>
-      </Button>
+      <View className="w-full max-w-xs gap-3">
+        <Button onPress={() => router.push("/(app)/accounts")}>
+          <Button.Label>Manage Accounts</Button.Label>
+        </Button>
+        <Button variant="secondary" onPress={() => router.push("/(app)/categories")}>
+          <Button.Label>Manage Categories</Button.Label>
+        </Button>
+        <Button variant="secondary" onPress={() => router.push("/(app)/projects")}>
+          <Button.Label>Projects</Button.Label>
+        </Button>
+        <Button variant="tertiary" onPress={() => router.push("/(app)/profile")}>
+          <Button.Label>Go to Profile</Button.Label>
+        </Button>
+      </View>
+
     </View>
   );
 }
