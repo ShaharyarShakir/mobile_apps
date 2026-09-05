@@ -33,6 +33,12 @@ export default function AppLayout() {
         }}
       />
       <Stack.Screen
+        name="project/create"
+        options={{
+          title: "Create project",
+        }}
+      />
+      <Stack.Screen
         name="project/[id]"
         options={{
           title: "Project",
@@ -41,10 +47,59 @@ export default function AppLayout() {
       <Stack.Screen
         name="project/[id]/edit"
         options={{
-          title: "Edit Project",
+          title: "Edit project",
+        }}
+      />
+      <Stack.Screen
+        name="accounts"
+        options={{
+          title: "Accounts",
+        }}
+      />
+      <Stack.Screen
+        name="account/create"
+        options={{
+          title: "New account",
+        }}
+      />
+      <Stack.Screen
+        name="account/[id]"
+        options={{
+          title: "Account",
+        }}
+      />
+      <Stack.Screen
+        name="account/[id]/edit"
+        options={{
+          title: "Edit account",
+        }}
+      />
+      <Stack.Screen
+        name="categories"
+        options={{
+          title: "Categories",
+        }}
+      />
+      <Stack.Screen
+        name="category/create"
+        options={{
+          title: "New category",
+        }}
+      />
+      <Stack.Screen
+        name="category/[id]"
+        options={{
+          title: "Category",
+        }}
+      />
+      <Stack.Screen
+        name="category/[id]/edit"
+        options={{
+          title: "Edit category",
         }}
       />
     </Stack>
   );
 }
+
 
