@@ -1,50 +1,44 @@
 import { expo } from "@better-auth/expo";
-import { createDb } from "@sashory/db";
+import { db } from "@sashory/db";
 import * as schema from "@sashory/db/schema/auth";
 import { env } from "@sashory/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
-export function createAuth() {
-  const db = createDb();
-
-  return betterAuth({
-    database: drizzleAdapter(db, {
-      provider: "pg",
-
-      schema: schema,
-    }),
-    trustedOrigins: [
-      env.CORS_ORIGIN,
-      "sashory://",
-      "sashory.expo.direct://",
-
-      ...(env.NODE_ENV === 'development' ? [
-        "exp://",
+const developmentOrigins =
+  env.NODE_ENV === "development"
+    ? [
         "exp://**",
-        "exp://192.168.*.*/**",
-        "exp://localhost:8081",
-        "http://localhost:8081",
         "http://localhost:*",
-        "http://192.168.0.*.*"
+        "http://127.0.0.1:*",
+        "http://10.0.2.2:*",
+        "http://192.168.*.*:*",
+      ]
+    : [];
 
+export const auth = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema,
+  }),
+  baseURL: env.BETTER_AUTH_URL,
+  trustedOrigins: [
+    env.CORS_ORIGIN,
+    // Native app schemes
+    "sashory://",
+    "sashory.expo.direct://",
+    ...developmentOrigins,
+  ],
+  secret: env.BETTER_AUTH_SECRET,
+  emailAndPassword: {
+    enabled: true,
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 30,
+    updateAge: 60 * 60 * 24,
+  },
+  plugins: [expo()],
+});
 
-      ] : [])
-    ],
-    emailAndPassword: {
-      enabled: true,
-    },
-    secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
-    advanced: {
-      defaultCookieAttributes: {
-        sameSite: "none",
-        secure: true,
-        httpOnly: true,
-      },
-    },
-    plugins: [expo()],
-  });
-}
+export type Auth = typeof auth;
 
-export const auth = createAuth();
