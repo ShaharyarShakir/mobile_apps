@@ -184,7 +184,8 @@
    Uses Uniwind @variant system for automatic switching
    --------------------------------------------------------------------------- */
 @layer theme {
-    @variant light {
+    :root {
+        @variant light {
         /* ── Background & Foreground ─────────────────────────────────────────── */
         --background: oklch(0.944 0 0);
         /* Flash White #F0F0F0 */
@@ -362,6 +363,7 @@
         --overlay-shadow: 0 0 1px 0 rgba(255, 255, 255, 0.2) inset;
         --field-shadow: 0 0 0 0 transparent inset;
     }
+}
 }
 
 /* ---------------------------------------------------------------------------
