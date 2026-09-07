@@ -23,28 +23,35 @@ export const Logo = ({
     ...props
 }: LogoProps) => {
     const scale = typeof size === "number" ? size : size === "sm" ? 0.5 : 1;
-    const iconSize = 42 * scale;
-    const fontSize = 48 * scale;
-    const marginTop = 16 * scale;
-    const lineHeight = 59 * scale;
+    const iconWidth = 42 * scale;
+    const iconHeight = 37 * scale;
+    const fontSize = 40 * scale;
 
     return (
         <View
-            style={[{ flexDirection: "row", alignItems: "flex-start" }, style]}
+            style={[
+                {
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                },
+                style,
+            ]}
             {...props}
         >
             <LogoIcon
-                width={iconSize}
-                height={37 * scale}
+                width={iconWidth}
+                height={iconHeight}
                 color={color}
-                style={{ marginTop, marginRight: -1 * scale }}
+                style={{ marginRight: -1 * scale }}
             />
             <Text
                 style={{
                     fontFamily: "PlusJakartaSans_700Bold_Italic",
                     fontSize,
-                    lineHeight,
                     color,
+                    includeFontPadding: false,
+                    textAlignVertical: "center",
                     marginLeft: 1 * scale,
                 }}
             >
