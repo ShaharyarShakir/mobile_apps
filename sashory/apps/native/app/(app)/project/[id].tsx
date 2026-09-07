@@ -1,10 +1,12 @@
 import { useProject } from "@/hooks/use-project";
 import { useDeleteProject } from "@/hooks/use-project-mutations";
 import { showMutationError } from "@/lib/mutation-error";
+import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Button, Surface } from "heroui-native";
 import {
+  ActivityIndicator,
   Alert,
-  Pressable,
   ScrollView,
   Text,
   View,
@@ -19,22 +21,20 @@ export default function ProjectDetailScreen() {
 
   if (projectQuery.isPending) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <Text>Loading project...</Text>
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text className="text-muted-foreground mt-3 text-sm">Loading project...</Text>
       </View>
     );
   }
 
   if (projectQuery.isError || !projectQuery.data) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 p-4">
-        <Text>Unable to load project.</Text>
-        <Pressable
-          className="rounded-xl bg-black px-4 py-3"
-          onPress={() => projectQuery.refetch()}
-        >
-          <Text className="font-semibold text-white">Try again</Text>
-        </Pressable>
+      <View className="flex-1 items-center justify-center gap-4 p-6 bg-background">
+        <Text className="text-danger font-medium text-center">Unable to load project.</Text>
+        <Button onPress={() => projectQuery.refetch()} className="bg-accent">
+          <Button.Label className="text-accent-foreground">Try again</Button.Label>
+        </Button>
       </View>
     );
   }
@@ -51,7 +51,7 @@ export default function ProjectDetailScreen() {
   function handleDelete() {
     Alert.alert(
       "Delete project",
-      "This action cannot be undone.",
+      "This action cannot be undone and will remove this project.",
       [
         {
           text: "Cancel",
@@ -81,27 +81,42 @@ export default function ProjectDetailScreen() {
         }}
       />
 
-      <ScrollView className="flex-1 p-4">
+      <ScrollView className="flex-1 p-5 bg-background">
         <View className="gap-6">
-          <View className="gap-2">
-            <Text className="text-2xl font-bold">{project.name}</Text>
-            <Text className="text-sm text-gray-500">
-              Created {createdAtFormatted}
-            </Text>
-          </View>
+          {/* Header Card */}
+          <Surface variant="secondary" className="rounded-3xl border border-border p-6 gap-5">
+            <View className="flex-row items-center gap-3.5">
+              <View className="w-12 h-12 rounded-2xl bg-blue-500/15 items-center justify-center">
+                <Ionicons name="folder-outline" size={26} color="#3B82F6" />
+              </View>
 
-          {project.description ? (
-            <View className="gap-2">
-              <Text className="font-medium text-gray-700">Description</Text>
-              <Text className="text-base text-gray-900 leading-relaxed">
-                {project.description}
-              </Text>
+              <View className="flex-1">
+                <Text className="text-xl font-bold text-foreground">
+                  {project.name}
+                </Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">
+                  Created {createdAtFormatted}
+                </Text>
+              </View>
             </View>
-          ) : null}
 
-          <View className="mt-6 gap-3">
-            <Pressable
-              className="items-center rounded-xl bg-black px-4 py-3"
+            {project.description ? (
+              <View className="border-t border-border/70 pt-4 gap-1.5">
+                <Text className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Description
+                </Text>
+                <Text className="text-sm text-foreground leading-relaxed">
+                  {project.description}
+                </Text>
+              </View>
+            ) : null}
+          </Surface>
+
+          {/* Action Buttons */}
+          <View className="gap-3 mt-2">
+            <Button
+              className="bg-accent"
+              size="lg"
               onPress={() =>
                 router.push({
                   pathname: "/(app)/project/[id]/edit",
@@ -109,18 +124,21 @@ export default function ProjectDetailScreen() {
                 })
               }
             >
-              <Text className="font-semibold text-white">Edit project</Text>
-            </Pressable>
+              <Button.Label className="text-accent-foreground font-semibold">
+                Edit Project
+              </Button.Label>
+            </Button>
 
-            <Pressable
-              className="items-center rounded-xl border border-red-200 bg-red-50 px-4 py-3"
-              disabled={deleteProject.isPending}
+            <Button
+              variant="danger"
+              size="lg"
+              isDisabled={deleteProject.isPending}
               onPress={handleDelete}
             >
-              <Text className="font-semibold text-red-600">
-                {deleteProject.isPending ? "Deleting..." : "Delete project"}
-              </Text>
-            </Pressable>
+              <Button.Label>
+                {deleteProject.isPending ? "Deleting..." : "Delete Project"}
+              </Button.Label>
+            </Button>
           </View>
         </View>
       </ScrollView>
