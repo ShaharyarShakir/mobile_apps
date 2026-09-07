@@ -1,7 +1,9 @@
 import { useCategory } from "@/hooks/use-categories";
 import { useArchiveCategory } from "@/hooks/use-category-mutations";
 import { showMutationError } from "@/lib/mutation-error";
+import { Ionicons } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { Button, Surface } from "heroui-native";
 import {
   Alert,
   Pressable,
@@ -81,32 +83,48 @@ export default function CategoryDetailScreen() {
         }}
       />
 
-      <ScrollView className="flex-1 p-4 bg-background">
+      <ScrollView className="flex-1 p-5 bg-background">
         <View className="gap-6">
           {/* Header Card */}
-          <View className="rounded-2xl border border-border bg-card p-5 gap-4">
+          <Surface variant="secondary" className="rounded-3xl border border-border p-6 gap-5">
             <View className="flex-row items-center justify-between">
-              <View className="gap-1 flex-1">
-                <Text className="text-2xl font-bold text-foreground">
-                  {category.name}
-                </Text>
-                <Text className="text-xs text-muted-foreground">
-                  Created {createdAtFormatted}
-                </Text>
+              <View className="flex-row items-center gap-3.5 flex-1">
+                <View
+                  className={`w-12 h-12 rounded-2xl items-center justify-center ${
+                    category.type === "INCOME"
+                      ? "bg-emerald-500/15"
+                      : "bg-rose-500/15"
+                  }`}
+                >
+                  <Ionicons
+                    name={category.type === "INCOME" ? "trending-up" : "trending-down"}
+                    size={26}
+                    color={category.type === "INCOME" ? "#10B981" : "#F43F5E"}
+                  />
+                </View>
+
+                <View className="flex-1">
+                  <Text className="text-xl font-bold text-foreground">
+                    {category.name}
+                  </Text>
+                  <Text className="text-xs text-muted-foreground mt-0.5">
+                    Created {createdAtFormatted}
+                  </Text>
+                </View>
               </View>
 
               <View
-                className={`rounded-lg px-2.5 py-1 ${
+                className={`rounded-full px-3 py-1 ${
                   category.type === "INCOME"
-                    ? "bg-emerald-50 dark:bg-emerald-950/40"
-                    : "bg-amber-50 dark:bg-amber-950/40"
+                    ? "bg-emerald-500/15"
+                    : "bg-rose-500/15"
                 }`}
               >
                 <Text
-                  className={`text-xs font-semibold ${
+                  className={`text-xs font-bold ${
                     category.type === "INCOME"
                       ? "text-emerald-700 dark:text-emerald-400"
-                      : "text-amber-700 dark:text-amber-400"
+                      : "text-rose-700 dark:text-rose-400"
                   }`}
                 >
                   {category.type}
@@ -114,31 +132,39 @@ export default function CategoryDetailScreen() {
               </View>
             </View>
 
-            <View className="flex-row gap-4 border-t border-border pt-4">
+            <View className="flex-row gap-4 border-t border-border/70 pt-4">
               <View className="flex-1">
-                <Text className="text-xs text-muted-foreground">Purpose</Text>
-                <Text className="text-base font-semibold text-foreground">
-                  {category.type === "INCOME" ? "Money Source" : "Expense Destination"}
+                <Text className="text-xs text-muted-foreground font-medium">Type Classification</Text>
+                <Text className="text-base font-bold text-foreground mt-0.5">
+                  {category.type === "INCOME" ? "Income Stream" : "Expense Flow"}
                 </Text>
               </View>
 
               <View className="flex-1">
-                <Text className="text-xs text-muted-foreground">Status</Text>
-                <Text
-                  className={`text-base font-semibold ${
-                    category.isActive ? "text-emerald-600" : "text-gray-500"
-                  }`}
-                >
-                  {category.isActive ? "Active" : "Archived"}
-                </Text>
+                <Text className="text-xs text-muted-foreground font-medium">Status</Text>
+                <View className="flex-row items-center gap-1.5 mt-0.5">
+                  <View
+                    className={`w-2 h-2 rounded-full ${
+                      category.isActive ? "bg-emerald-500" : "bg-gray-400"
+                    }`}
+                  />
+                  <Text
+                    className={`text-base font-bold ${
+                      category.isActive ? "text-foreground" : "text-muted-foreground"
+                    }`}
+                  >
+                    {category.isActive ? "Active" : "Archived"}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
+          </Surface>
 
           {/* Action Buttons */}
-          <View className="gap-3 mt-4">
-            <Pressable
-              className="items-center rounded-xl bg-black px-4 py-3.5 dark:bg-white"
+          <View className="gap-3 mt-2">
+            <Button
+              className="bg-accent"
+              size="lg"
               onPress={() =>
                 router.push({
                   pathname: "/(app)/category/[id]/edit",
@@ -146,21 +172,22 @@ export default function CategoryDetailScreen() {
                 })
               }
             >
-              <Text className="font-semibold text-white dark:text-black">
-                Edit category
-              </Text>
-            </Pressable>
+              <Button.Label className="text-accent-foreground font-semibold">
+                Edit Category
+              </Button.Label>
+            </Button>
 
             {category.isActive && (
-              <Pressable
-                className="items-center rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 dark:border-red-900/50 dark:bg-red-950/30"
-                disabled={archiveCategory.isPending}
+              <Button
+                variant="danger"
+                size="lg"
+                isDisabled={archiveCategory.isPending}
                 onPress={handleArchive}
               >
-                <Text className="font-semibold text-red-600 dark:text-red-400">
-                  {archiveCategory.isPending ? "Archiving..." : "Archive category"}
-                </Text>
-              </Pressable>
+                <Button.Label>
+                  {archiveCategory.isPending ? "Archiving..." : "Archive Category"}
+                </Button.Label>
+              </Button>
             )}
           </View>
         </View>
