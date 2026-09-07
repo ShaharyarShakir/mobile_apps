@@ -1,10 +1,15 @@
 import { env } from "@sashory/env/server";
 import { drizzle } from "drizzle-orm/node-postgres";
-
 import * as schema from "./schema";
 
+export const db = drizzle(env.DATABASE_URL, {
+  schema,
+});
+
 export function createDb() {
-  return drizzle(env.DATABASE_URL, { schema });
+  return db;
 }
 
-export const db = createDb();
+export * from "./schema";
+export * from "./lib/id";
+

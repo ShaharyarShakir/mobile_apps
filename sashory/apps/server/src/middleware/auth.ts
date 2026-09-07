@@ -1,22 +1,36 @@
 import { auth } from "@sashory/auth";
 import { createMiddleware } from "hono/factory";
 
-type AppEnv = {
-    Variables: {
-        userId: string;
-        userEmail: string;
-    }
-}
+export type AuthVariables = {
+  user: NonNullable<
+    Awaited<ReturnType<typeof auth.api.getSession>>
+  >["user"];
+  session: NonNullable<
+    Awaited<ReturnType<typeof auth.api.getSession>>
+  >["session"];
+};
 
-export const authMiddleware = createMiddleware<AppEnv>(async (c, next) => {
-    const session = await auth.api.getSession({
-        headers: c.req.header(),
-    })
-    if (!session?.user) return c.json({ error: "Unauthorized" }, 401)
+export const authMiddleware = createMiddleware<{
+  Variables: AuthVariables;
+}>(async (c, next) => {
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  });
 
+  if (!session) {
+    return c.json(
+      {
+        error: {
+          code: "UNAUTHORIZED",
+          message: "Authentication required",
+        },
+      },
+      401,
+    );
+  }
 
-    c.set("userId", session.user.id)
-    c.set("userEmail", session.user.email)
-    await next()
+  c.set("user", session.user);
+  c.set("session", session.session);
 
-})
+  await next();
+});
