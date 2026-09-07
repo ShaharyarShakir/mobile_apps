@@ -5,6 +5,7 @@ import {
   PlusJakartaSans_500Medium,
   PlusJakartaSans_600SemiBold,
   PlusJakartaSans_700Bold,
+  PlusJakartaSans_700Bold_Italic,
   useFonts,
 } from "@expo-google-fonts/plus-jakarta-sans";
 import { HeroUINativeProvider } from "heroui-native";
@@ -21,6 +22,7 @@ export default function RootLayout() {
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
+    PlusJakartaSans_700Bold_Italic,
   });
 
   if (!fontsLoaded) return null;
@@ -29,7 +31,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <KeyboardProvider>
         <AppThemeProvider>
-          <HeroUINativeProvider>
+          <HeroUINativeProvider config={{ devInfo: { stylingPrinciples: false } }}>
             <QueryClientProvider client={queryClient}>
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />

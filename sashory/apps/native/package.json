@@ -5,7 +5,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "dev": "expo start --clear",
+    "dev": "expo run:android",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "prebuild": "expo prebuild",
@@ -37,6 +37,7 @@
     "expo-secure-store": "~56.0.4",
     "expo-sharing": "~56.0.15",
     "expo-status-bar": "~56.0.4",
+    "expo-system-ui": "~56.0.5",
     "expo-web-browser": "~56.0.5",
     "heroui-native": "^1.0.3",
     "hono": "^4.8.2",
