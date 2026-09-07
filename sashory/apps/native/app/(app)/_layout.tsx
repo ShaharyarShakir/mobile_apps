@@ -1,8 +1,12 @@
 import { Redirect, Stack } from "expo-router";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useThemeColor } from "heroui-native";
 
 export default function AppLayout() {
   const { data: session, isPending } = useAuthSession();
+  const surfaceColor = useThemeColor("surface");
+  const foregroundColor = useThemeColor("foreground");
+  const backgroundColor = useThemeColor("background");
 
   if (isPending) {
     return null;
@@ -13,11 +17,26 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: surfaceColor,
+        },
+        headerTintColor: foregroundColor,
+        headerTitleStyle: {
+          fontFamily: "PlusJakartaSans_700Bold",
+          fontSize: 18,
+        },
+        headerShadowVisible: false,
+        contentStyle: {
+          backgroundColor,
+        },
+      }}
+    >
       <Stack.Screen
         name="home"
         options={{
-          title: "Home",
+          headerShown: false,
         }}
       />
       <Stack.Screen
