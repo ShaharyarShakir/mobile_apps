@@ -1,0 +1,9 @@
+steps:
+  - echo: Preview Segment 1 - Launch and view format choices
+  - launch: com.mytinyapps.tinycompressor
+  - await:
+      visible:
+        text: Compress
+  - wait: 1200
+  - await:
+      idle: true
