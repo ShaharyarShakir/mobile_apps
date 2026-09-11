@@ -23,6 +23,8 @@ import {
 import {
   CompressionPresetKey,
   IMAGE_PRESETS,
+  ImageResolutionKey,
+  RESOLUTION_PRESETS,
 } from "../../constants/compression";
 import { formatFileSize, getTotalSize, calculateSavings } from "../../lib/fileUtils";
 import { MAX_IMAGE_COUNT, pickImages } from "../../lib/pickers/imagePicker";
@@ -35,6 +37,7 @@ import { recentStore } from "../../lib/recentStore";
 import { triggerHaptic } from "../../lib/haptics";
 import { SelectedFileCard } from "../../components/SelectedFileCard";
 import { PresetSelector } from "../../components/PresetSelector";
+import { ResolutionSelector } from "../../components/ResolutionSelector";
 import { PrimaryButton } from "../../components/PrimaryButton";
 import { ProgressBar } from "../../components/ProgressBar";
 import { SuccessCheckmark } from "../../components/SuccessCheckmark";
@@ -56,6 +59,7 @@ export default function CompressScreen() {
   const [selectedType, setSelectedType] = useState<CompressionFileType>("image");
   const [files, setFiles] = useState<SelectedFile[]>([]);
   const [preset, setPreset] = useState<CompressionPresetKey>("balanced");
+  const [resolution, setResolution] = useState<ImageResolutionKey>("2k");
   const [isPicking, setIsPicking] = useState(false);
 
   // Progress
@@ -203,14 +207,24 @@ export default function CompressScreen() {
     setSavedSuccess(false);
 
     const startTime = Date.now();
-    logCompressionStarted(selectedType, preset, files.length, totalOriginalSize);
+    const presetLabel = isImage ? `${preset}_${resolution}` : preset;
+    logCompressionStarted(selectedType, presetLabel, files.length, totalOriginalSize);
 
     try {
       if (selectedType === "image") {
         const quality = IMAGE_PRESETS[preset];
-        const results = await compressImagesBatch(files, quality, (p) => {
-          setImgProgress(p);
-        });
+        const maxDimension = RESOLUTION_PRESETS[resolution].maxDimension;
+        const results = await compressImagesBatch(
+          files,
+          {
+            quality,
+            maxDimension,
+            resolutionPreset: resolution,
+          },
+          (p) => {
+            setImgProgress(p);
+          }
+        );
 
         setImageResults(results);
 
@@ -594,6 +608,16 @@ export default function CompressScreen() {
                 {formatFileSize(totalOriginalSize)}
               </Text>
             </View>
+
+            {/* Resolution Selector (Images only) */}
+            {isImage && (
+              <View style={styles.resolutionWrapper}>
+                <ResolutionSelector
+                  selectedResolution={resolution}
+                  onSelectResolution={setResolution}
+                />
+              </View>
+            )}
 
             {/* Preset Selector */}
             <View style={styles.presetWrapper}>
