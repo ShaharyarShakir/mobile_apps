@@ -1,0 +1,11 @@
+executionPrerequisite: >-
+  App launched on the main Compress screen with format options visible.
+
+steps:
+  - echo: Preview Segment 2 - Showcase format choices
+  - await:
+      visible:
+        text: Compress
+  - wait: 1500
+  - await:
+      idle: true
