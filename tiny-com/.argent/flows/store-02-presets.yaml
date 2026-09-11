@@ -1,0 +1,9 @@
+steps:
+  - echo: Open compression mode choices
+  - launch: com.mytinyapps.tinycompressor
+  - await:
+      visible:
+        text: Compress
+  - wait: 500
+  - await:
+      idle: true
