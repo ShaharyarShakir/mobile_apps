@@ -1,0 +1,13 @@
+executionPrerequisite: >-
+  App on main screen.
+
+steps:
+  - echo: Preview Segment 3 - Navigate to Recent tab to view savings summary
+  - await:
+      visible:
+        text: Recent
+  - tap:
+      text: Recent
+  - wait: 2000
+  - await:
+      idle: true
