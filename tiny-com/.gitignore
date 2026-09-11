@@ -2,13 +2,13 @@
 
 # dependencies
 node_modules/
-
+out/
 # Expo
 .expo/
 dist/
 web-build/
 expo-env.d.ts
-
+.argent/recordings/
 # Native
 .kotlin/
 *.orig.*
