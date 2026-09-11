@@ -5,8 +5,18 @@ export type SelectedFile = {
   uri: string;
   name: string;
   size?: number;
+  width?: number;
+  height?: number;
   type: CompressionFileType;
   mimeType?: string;
+};
+
+export type ImageResolutionKey = "original" | "2k" | "1080p" | "720p";
+
+export type ImageCompressionConfig = {
+  quality: number;
+  maxDimension?: number;
+  resolutionPreset?: ImageResolutionKey;
 };
 
 export type CompressionResult = {
