@@ -45,6 +45,8 @@ export async function pickImages(currentCount: number = 0): Promise<SelectedFile
         uri: asset.uri,
         name: rawName,
         size,
+        width: asset.width,
+        height: asset.height,
         type: "image",
         mimeType: asset.mimeType || "image/jpeg",
       };

@@ -1,11 +1,14 @@
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImageManipulator from "expo-image-manipulator";
+import { Image as RNImage } from "react-native";
 import {
   CompressionProgress,
   CompressionResult,
+  ImageCompressionConfig,
   SelectedFile,
 } from "../../types/file";
 import { calculateSavings, getFileSizeAsync } from "../fileUtils";
+import { computeTargetDimensions } from "./scaler";
 
 /**
  * Determines the optimal save format for the input image.
@@ -28,12 +31,44 @@ function resolveSaveFormat(file: SelectedFile): ImageManipulator.SaveFormat {
 }
 
 /**
- * Compresses an individual image on-device and measures actual savings.
+ * Safely resolves image dimensions either from file metadata or via RN Image.getSize.
+ */
+async function resolveDimensions(
+  image: SelectedFile
+): Promise<{ width: number; height: number } | null> {
+  if (image.width && image.height && image.width > 0 && image.height > 0) {
+    return { width: image.width, height: image.height };
+  }
+
+  return new Promise((resolve) => {
+    RNImage.getSize(
+      image.uri,
+      (width, height) => resolve({ width, height }),
+      () => resolve(null)
+    );
+  });
+}
+
+/**
+ * Normalizes quality number or full ImageCompressionConfig.
+ */
+function normalizeConfig(
+  input: number | ImageCompressionConfig
+): ImageCompressionConfig {
+  if (typeof input === "number") {
+    return { quality: input };
+  }
+  return input;
+}
+
+/**
+ * Compresses an individual image on-device with optional resolution scaling and measures actual savings.
  */
 export async function compressImage(
   image: SelectedFile,
-  quality: number
+  configOrQuality: number | ImageCompressionConfig
 ): Promise<CompressionResult> {
+  const config = normalizeConfig(configOrQuality);
   const format = resolveSaveFormat(image);
 
   let originalSize = image.size;
@@ -41,11 +76,33 @@ export async function compressImage(
     originalSize = (await getFileSizeAsync(image.uri)) || 0;
   }
 
+  const actions: ImageManipulator.Action[] = [];
+
+  // Apply resolution scaling if maxDimension is requested
+  if (config.maxDimension && config.maxDimension > 0) {
+    const dims = await resolveDimensions(image);
+    if (dims) {
+      const targetDims = computeTargetDimensions(
+        dims.width,
+        dims.height,
+        config.maxDimension
+      );
+      if (targetDims) {
+        actions.push({
+          resize: {
+            width: targetDims.width,
+            height: targetDims.height,
+          },
+        });
+      }
+    }
+  }
+
   const manipResult = await ImageManipulator.manipulateAsync(
     image.uri,
-    [], // No transformations, pure quality compression
+    actions,
     {
-      compress: quality,
+      compress: config.quality,
       format,
     }
   );
@@ -96,9 +153,10 @@ export async function compressImage(
  */
 export async function compressImagesBatch(
   files: SelectedFile[],
-  quality: number,
+  configOrQuality: number | ImageCompressionConfig,
   onProgress?: (progress: CompressionProgress) => void
 ): Promise<CompressionResult[]> {
+  const config = normalizeConfig(configOrQuality);
   const results: CompressionResult[] = [];
   const total = files.length;
 
@@ -115,7 +173,7 @@ export async function compressImagesBatch(
     }
 
     try {
-      const result = await compressImage(file, quality);
+      const result = await compressImage(file, config);
       results.push(result);
     } catch {
       results.push({
