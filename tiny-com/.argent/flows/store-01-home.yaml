@@ -1,0 +1,8 @@
+steps:
+  - echo: Launch Tiny Compressor on main screen
+  - launch: com.mytinyapps.tinycompressor
+  - await:
+      visible:
+        text: Compress
+  - await:
+      idle: true
