@@ -1,0 +1,11 @@
+steps:
+  - echo: Navigate to Recent History screen
+  - launch: com.mytinyapps.tinycompressor
+  - await:
+      visible:
+        text: Recent
+  - tap:
+      text: Recent
+  - wait: 300
+  - await:
+      idle: true
