@@ -1,0 +1,11 @@
+steps:
+  - echo: Switch to PDF compression screen
+  - launch: com.mytinyapps.tinycompressor
+  - await:
+      visible:
+        text: PDF
+  - tap:
+      text: PDF
+  - wait: 300
+  - await:
+      idle: true
